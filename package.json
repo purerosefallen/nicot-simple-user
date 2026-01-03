@@ -1,10 +1,19 @@
 {
   "name": "nicot-simple-user",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
-  "private": true,
-  "license": "UNLICENSED",
+  "description": "Simple user module based on NICOT",
+  "author": "Nanahira <nanahira@momobako.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/purerosefallen/nicot-simple-user.git"
+  },
+  "bugs": {
+    "url": "https://github.com/purerosefallen/nicot-simple-user/issues"
+  },
+  "homepage": "https://github.com/purerosefallen/nicot-simple-user",
+  "main": "dist/simple-user/index.js",
+  "types": "dist/simple-user/index.d.ts",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -20,25 +29,20 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@nestjs/common": "^11.0.1",
-    "@nestjs/config": "^4.0.2",
-    "@nestjs/core": "^11.0.1",
-    "@nestjs/platform-express": "^11.0.1",
-    "@nestjs/swagger": "^11.2.3",
-    "@nestjs/typeorm": "^11.0.0",
     "aragami": "^1.2.9",
     "argon2": "^0.44.0",
+    "crypto-random-string": "3.3.1",
+    "nestjs-aragami": "^1.2.0"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/swagger": "^11.2.3",
+    "@nestjs/typeorm": "^11.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
-    "crypto-random-string": "3.3.1",
-    "nesties": "^1.1.26",
-    "nestjs-aragami": "^1.2.0",
     "nicot": "^1.3.1",
-    "pg": "^8.16.3",
-    "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1",
-    "typeorm": "^0.3.28",
-    "yaml": "^2.8.2"
+    "typeorm": "^0.3.28"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -65,7 +69,14 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.20.0"
+    "typescript-eslint": "^8.20.0",
+    "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
+    "nesties": "^1.1.26",
+    "pg": "^8.16.3",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "yaml": "^2.8.2"
   },
   "jest": {
     "moduleFileExtensions": [
