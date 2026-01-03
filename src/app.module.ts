@@ -7,6 +7,10 @@ import { AppUser } from './app-user.entity';
 import { ArticleService } from './article/article.service';
 import { Article } from './article/article.entity';
 import { ArticleController } from './article/article.controller';
+import {
+  UserLanguageModule,
+  UserLanguageProvider,
+} from './user-language/user-language.module';
 
 @Module({
   imports: [
@@ -34,11 +38,19 @@ import { ArticleController } from './article/article.controller';
       }),
     }),
     TypeOrmModule.forFeature([Article]),
-    SimpleUserModule.register({
+    SimpleUserModule.registerAsync({
       userClass: AppUser,
-      sendCodeGenerator: (ctx) => {
-        console.log(`Generating code for ${ctx.email} on ${ctx.codePurpose}`);
-        return '123456';
+      imports: [UserLanguageModule],
+      inject: [UserLanguageProvider.token],
+      useFactory: async () => {
+        return {
+          sendCodeGenerator: (ctx) => {
+            console.log(
+              `Generating code for ${ctx.email} on ${ctx.codePurpose}`,
+            );
+            return '123456';
+          },
+        };
       },
     }),
   ],

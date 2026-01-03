@@ -21,7 +21,7 @@ import {
 import { OptionsExToken } from './tokens';
 import { ValueProvider } from '@nestjs/common/interfaces/modules/provider.interface';
 import { patchUserCenterControllerMe } from './user-center/patch-me';
-import { addInjectionTokenMapping } from 'nicot';
+import { addInjectionTokenMapping, ApiFromProvider } from 'nicot';
 
 export type SimpleUserRegisterOptions = Parameters<
   typeof ConfigurableModuleClass.register
@@ -42,6 +42,8 @@ const patchUserCenterControllerMeWithDynamicModule = (
   }
 };
 
+const controllers = [SendCodeController, LoginController, UserCenterController];
+
 @Module({
   providers: [
     SimpleUserService,
@@ -54,7 +56,7 @@ const patchUserCenterControllerMeWithDynamicModule = (
     userResolverProvider.provider,
     userRiskControlResolverProvider.provider,
   ],
-  controllers: [SendCodeController, LoginController, UserCenterController],
+  controllers,
 })
 export class SimpleUserModule extends ConfigurableModuleClass {
   static register(options: SimpleUserRegisterOptions): DynamicModule {
@@ -71,6 +73,11 @@ export class SimpleUserModule extends ConfigurableModuleClass {
         (t) => ((t as OptionalFactoryDependency)?.token || t) as InjectionToken,
       );
       addInjectionTokenMapping(MODULE_OPTIONS_TOKEN, normalizedInject);
+      for (const token of normalizedInject) {
+        for (const controller of controllers) {
+          ApiFromProvider(token)(controller);
+        }
+      }
     }
     return attachAragamiWithBridge(base);
   }

@@ -1,6 +1,5 @@
 import {
   ApiError,
-  ApiInject,
   CombinedParamResolver,
   ParamResolver,
   TransformParamResolver,
