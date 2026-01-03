@@ -3,6 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { loadConfig } from './utility/load-config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SimpleUserModule } from './simple-user/simple-user.module';
+import { AppUser } from './app-user.entity';
+import { ArticleService } from './article/article.service';
+import { Article } from './article/article.entity';
+import { ArticleController } from './article/article.controller';
 
 @Module({
   imports: [
@@ -29,12 +33,16 @@ import { SimpleUserModule } from './simple-user/simple-user.module';
         bigNumberStrings: false,
       }),
     }),
+    TypeOrmModule.forFeature([Article]),
     SimpleUserModule.register({
+      userClass: AppUser,
       sendCodeGenerator: (ctx) => {
         console.log(`Generating code for ${ctx.email} on ${ctx.codePurpose}`);
         return '123456';
       },
     }),
   ],
+  providers: [ArticleService],
+  controllers: [ArticleController],
 })
 export class AppModule {}

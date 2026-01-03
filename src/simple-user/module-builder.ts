@@ -12,15 +12,13 @@ export const { ConfigurableModuleClass, MODULE_OPTIONS_TOKEN } =
         isGlobal: false,
       },
       (definition, extras) => {
+        const typeormFeatModule = TypeOrmModule.forFeature(
+          [extras.userClass],
+          extras.userConnectionName,
+        );
         return {
           ...definition,
-          imports: [
-            ...(definition.imports || []),
-            TypeOrmModule.forFeature(
-              [extras.userClass],
-              extras.userConnectionName,
-            ),
-          ],
+          imports: [...(definition.imports || []), typeormFeatModule],
           providers: [
             ...(definition.providers || []),
             {
@@ -35,6 +33,7 @@ export const { ConfigurableModuleClass, MODULE_OPTIONS_TOKEN } =
               ),
             },
           ],
+          exports: [...(definition.exports || []), typeormFeatModule],
         };
       },
     )

@@ -1,9 +1,13 @@
-/install-npm.sh
+/install-npm*.sh
 .git*
 /data
 /output
 /config.yaml
 .idea
 .dockerignore
-Dockerfile
+Dockerfile*
 /src
+/dist/app*
+/dist/*.js
+/dist/*.d.ts
+/dist/article

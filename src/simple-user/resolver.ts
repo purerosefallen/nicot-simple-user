@@ -57,7 +57,7 @@ export const userResolver = new TransformParamResolver(
 );
 
 export const userResolverProvider = userResolver.toRequestScopedProvider();
-export const InjectCurrentUser = () => ApiInject(userResolverProvider.token);
+export const InjectCurrentUser = userResolverProvider.inject;
 export const PutCurrentUser = userResolver.toParamDecorator();
 export const ApiCurrentUser = userResolver.toApiPropertyDecorator();
 
@@ -71,8 +71,7 @@ export type UserRiskControlContext = TypeFromParamResolver<
 
 export const userRiskControlResolverProvider =
   userRiskControlResolver.toRequestScopedProvider();
-export const InjectRiskControlContext = () =>
-  ApiInject(userRiskControlResolverProvider.token);
+export const InjectRiskControlContext = userRiskControlResolverProvider.inject;
 export const PutRiskControlContext = userRiskControlResolver.toParamDecorator();
 export const ApiRiskControlContext =
   userRiskControlResolver.toApiPropertyDecorator();

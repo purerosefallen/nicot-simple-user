@@ -2,27 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from './../src/app.module';
-
-type BlankReturnMessageDto = {
-  statusCode: number;
-  message: string;
-  success: boolean;
-  timestamp: string;
-};
-
-type ReturnMessage<T> = BlankReturnMessageDto & { data?: T };
-
-type LoginResponseDto = {
-  token: string;
-  tokenExpiresAt: string;
-  userId: number;
-};
-
-type SimpleUserResultDto = {
-  id: number;
-  email?: string;
-  passwordSet: boolean;
-};
+import { AppUser } from '../src/app-user.entity';
+import { GenericReturnMessageDto } from 'nicot';
+import { LoginResponseDto } from '../src/simple-user/simple-user/login.dto';
 
 describe('SimpleUserModule (e2e)', () => {
   let app: INestApplication;
@@ -44,6 +26,31 @@ describe('SimpleUserModule (e2e)', () => {
   const password2 = `P@ss_${rand}_2`;
 
   let token: string | undefined;
+
+  type ArticleCreateResult = {
+    id: number;
+    title: string;
+    content: string;
+    userId: number;
+  };
+
+  type ArticleResult = ArticleCreateResult & {
+    user?: {
+      id: number;
+      email?: string;
+      passwordSet: boolean;
+      age: number;
+    };
+  };
+
+  let userId: number | undefined;
+  let currentEmail = email1;
+
+  let articleId: number | undefined;
+  const articleTitle1 = `Hello_${rand}`;
+  const articleTitle2 = `Hello2_${rand}`;
+  const articleContent1 = `Content_${rand}`;
+  const articleContent2 = `Content2_${rand}`;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -114,13 +121,14 @@ describe('SimpleUserModule (e2e)', () => {
       .expect(200);
 
     expectOkEnvelope(res.body);
-    const data = (res.body as ReturnMessage<LoginResponseDto>).data;
+    const data = (res.body as GenericReturnMessageDto<LoginResponseDto>).data;
     expect(data).toBeDefined();
     expect(typeof data.userId).toBe('number');
     expect(typeof data.token).toBe('string');
     expect(data.token).toHaveLength(64);
 
     token = data.token;
+    userId = data.userId;
   });
 
   it('GET /user-center/me -> should return current user info', async () => {
@@ -131,12 +139,13 @@ describe('SimpleUserModule (e2e)', () => {
       .expect(200);
 
     expectOkEnvelope(res.body);
-    const data = (res.body as ReturnMessage<SimpleUserResultDto>).data;
+    const data = (res.body as GenericReturnMessageDto<AppUser>).data;
     expect(data).toBeDefined();
     expect(typeof data.id).toBe('number');
     // 刚用 email 登录，通常应该有 email
     expect(data.email).toBe(email1);
     expect(typeof data.passwordSet).toBe('boolean');
+    expect(data.age).toBe(18); // from AppUser default
   });
 
   it('POST /user-center/change-password -> set password (first time) and then login by password', async () => {
@@ -158,7 +167,8 @@ describe('SimpleUserModule (e2e)', () => {
       .expect(200);
 
     expectOkEnvelope(loginOk.body);
-    const data = (loginOk.body as ReturnMessage<LoginResponseDto>).data;
+    const data = (loginOk.body as GenericReturnMessageDto<LoginResponseDto>)
+      .data;
     expect(data.token).toHaveLength(64);
 
     // 用错密码应 403
@@ -181,6 +191,8 @@ describe('SimpleUserModule (e2e)', () => {
 
     expectOkEnvelope(send.body);
 
+    currentEmail = email2;
+
     // 提交换绑
     const change = await request(httpServer)
       .post('/user-center/change-email')
@@ -199,8 +211,129 @@ describe('SimpleUserModule (e2e)', () => {
       .expect(200);
 
     expectOkEnvelope(relogin.body);
-    const data = (relogin.body as ReturnMessage<LoginResponseDto>).data;
+    const data = (relogin.body as GenericReturnMessageDto<LoginResponseDto>)
+      .data;
     expect(data.token).toHaveLength(64);
+  });
+
+  describe('Article (e2e)', () => {
+    it('POST /article -> should create article and auto-bind userId (ignore body.userId)', async () => {
+      expect(token).toBeDefined();
+      expect(userId).toBeDefined();
+
+      const res = await request(httpServer)
+        .post('/article')
+        .set('x-client-ssaid', ssaid)
+        .set('x-client-token', token)
+        .send({
+          title: articleTitle1,
+          content: articleContent1,
+          // 故意注入：如果 binding 正常，这个不该生效
+          userId: 999999999,
+        })
+        .expect(200);
+
+      expectOkEnvelope(res.body);
+
+      const data = (res.body as GenericReturnMessageDto<ArticleCreateResult>)
+        .data;
+      expect(data).toBeDefined();
+      expect(typeof data.id).toBe('number');
+      expect(data.title).toBe(articleTitle1);
+      expect(data.content).toBe(articleContent1);
+
+      // 核心：binding 自动绑定为当前登录用户
+      expect(data.userId).toBe(userId);
+
+      articleId = data.id;
+    });
+
+    it('GET /article/{id} -> should return article with user info and correct userId/email', async () => {
+      expect(articleId).toBeDefined();
+
+      const res = await request(httpServer)
+        .get(`/article/${articleId}`)
+        .set('x-client-ssaid', ssaid)
+        .set('x-client-token', token)
+        .expect(200);
+
+      expectOkEnvelope(res.body);
+      const data = (res.body as GenericReturnMessageDto<ArticleResult>).data;
+      expect(data).toBeDefined();
+      expect(data.id).toBe(articleId);
+      expect(data.userId).toBe(userId);
+
+      // 你的 schema 里 findOne 会带 user（ManyToOne + NotColumn），这里顺手断言一下
+      expect(data.user).toBeDefined();
+      expect(data.user.id).toBe(userId);
+      // email 可能是可选字段，但你这里应该有（我们已经换绑过）
+      expect(data.user.email).toBe(currentEmail);
+    });
+
+    it('GET /article -> should list articles and include the created one', async () => {
+      expect(articleId).toBeDefined();
+
+      const res = await request(httpServer)
+        .get('/article')
+        .set('x-client-ssaid', ssaid)
+        .set('x-client-token', token)
+        .query({ pageCount: 1, recordsPerPage: 10 })
+        .expect(200);
+
+      expectOkEnvelope(res.body);
+      expect(typeof res.body.total).toBe('number');
+      expect(Array.isArray(res.body.data)).toBe(true);
+
+      const found = (res.body.data as ArticleCreateResult[]).find(
+        (x) => x.id === articleId,
+      );
+      expect(found).toBeDefined();
+      expect(found.userId).toBe(userId);
+    });
+
+    it('PATCH /article/{id} -> should update title/content', async () => {
+      expect(articleId).toBeDefined();
+
+      const patch = await request(httpServer)
+        .patch(`/article/${articleId}`)
+        .set('x-client-ssaid', ssaid)
+        .set('x-client-token', token)
+        .send({ title: articleTitle2, content: articleContent2 })
+        .expect(200);
+
+      expectOkEnvelope(patch.body);
+
+      const after = await request(httpServer)
+        .get(`/article/${articleId}`)
+        .set('x-client-ssaid', ssaid)
+        .set('x-client-token', token)
+        .expect(200);
+
+      expectOkEnvelope(after.body);
+      const data = (after.body as GenericReturnMessageDto<ArticleResult>).data;
+      expect(data.title).toBe(articleTitle2);
+      expect(data.content).toBe(articleContent2);
+    });
+
+    it('DELETE /article/{id} -> should delete; then GET should 404', async () => {
+      expect(articleId).toBeDefined();
+
+      const del = await request(httpServer)
+        .delete(`/article/${articleId}`)
+        .set('x-client-ssaid', ssaid)
+        .set('x-client-token', token)
+        .expect(200);
+
+      expectOkEnvelope(del.body);
+
+      const gone = await request(httpServer)
+        .get(`/article/${articleId}`)
+        .set('x-client-ssaid', ssaid)
+        .set('x-client-token', token);
+
+      expect(gone.status).toBe(404);
+      expectOkEnvelope(gone.body);
+    });
   });
 
   it('POST /send-code/send (ResetPassword) -> POST /login/reset-password -> login with new password', async () => {

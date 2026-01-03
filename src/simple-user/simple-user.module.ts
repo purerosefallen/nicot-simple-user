@@ -1,5 +1,13 @@
-import { DynamicModule, Module } from '@nestjs/common';
-import { ConfigurableModuleClass } from './module-builder';
+import {
+  DynamicModule,
+  InjectionToken,
+  Module,
+  OptionalFactoryDependency,
+} from '@nestjs/common';
+import {
+  ConfigurableModuleClass,
+  MODULE_OPTIONS_TOKEN,
+} from './module-builder';
 import { attachAragamiWithBridge } from './aragami-init';
 import { SimpleUserService } from './simple-user/simple-user.service';
 import { SendCodeService } from './send-code/send-code.service';
@@ -13,6 +21,7 @@ import {
 import { OptionsExToken } from './tokens';
 import { ValueProvider } from '@nestjs/common/interfaces/modules/provider.interface';
 import { patchUserCenterControllerMe } from './user-center/patch-me';
+import { addInjectionTokenMapping } from 'nicot';
 
 export type SimpleUserRegisterOptions = Parameters<
   typeof ConfigurableModuleClass.register
@@ -57,6 +66,12 @@ export class SimpleUserModule extends ConfigurableModuleClass {
   static registerAsync(options: SimpleUserRegisterAsyncOptions): DynamicModule {
     const base = super.registerAsync(options);
     patchUserCenterControllerMeWithDynamicModule(base);
+    if (options.inject) {
+      const normalizedInject = options.inject.map(
+        (t) => ((t as OptionalFactoryDependency)?.token || t) as InjectionToken,
+      );
+      addInjectionTokenMapping(MODULE_OPTIONS_TOKEN, normalizedInject);
+    }
     return attachAragamiWithBridge(base);
   }
 }
