@@ -44,6 +44,7 @@ import {
       inject: [UserLanguageProvider.token],
       useFactory: async () => {
         return {
+          redisUrl: 'redis://127.0.0.1:6379/1',
           sendCodeGenerator: (ctx) => {
             console.log(
               `Generating code for ${ctx.email} on ${ctx.codePurpose}`,
