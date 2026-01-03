@@ -40,7 +40,11 @@ const patchUserCenterControllerMeWithDynamicModule = (
     userResolverProvider.provider,
     userRiskControlResolverProvider.provider,
   ],
-  exports: [SimpleUserService],
+  exports: [
+    SimpleUserService,
+    userResolverProvider.provider,
+    userRiskControlResolverProvider.provider,
+  ],
   controllers: [SendCodeController, LoginController, UserCenterController],
 })
 export class SimpleUserModule extends ConfigurableModuleClass {
