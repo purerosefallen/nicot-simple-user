@@ -9,6 +9,7 @@ export interface SimpleUserExtraOptions {
   userServiceCrudExtras?: CrudOptions<SimpleUser>;
   userConnectionName?: string;
   isGlobal?: boolean;
+  reexportAragami?: boolean;
 }
 
 export interface SimpleUserOptions {

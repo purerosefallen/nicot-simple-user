@@ -17,7 +17,10 @@ function deriveAragamiOptions(o: SimpleUserOptions): AragamiOptions {
 
 const ARAGAMI_OPTIONS = Symbol('ARAGAMI_OPTIONS');
 
-export function attachAragamiWithBridge(base: DynamicModule): DynamicModule {
+export function attachAragamiWithBridge(
+  base: DynamicModule,
+  reexport = false,
+): DynamicModule {
   const baseImports = base.imports ?? [];
   const baseProviders = base.providers ?? [];
 
@@ -48,6 +51,6 @@ export function attachAragamiWithBridge(base: DynamicModule): DynamicModule {
         useFactory: (aragamiOptions: AragamiOptions) => aragamiOptions,
       }),
     ],
-    exports: [...(base.exports || []), AragamiModule],
+    exports: [...(base.exports || []), ...(reexport ? [AragamiModule] : [])],
   };
 }
