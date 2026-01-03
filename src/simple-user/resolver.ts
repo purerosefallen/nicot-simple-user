@@ -37,7 +37,9 @@ export const userContextResolver = new CombinedParamResolver({
   ip: ipResolver,
 });
 
-export type UserContext = TypeFromParamResolver<typeof userContextResolver>;
+export type UserContext = TypeFromParamResolver<typeof userContextResolver> & {
+  forceAllowAnonymous?: boolean;
+};
 
 export const userResolver = new TransformParamResolver(
   userContextResolver,

@@ -118,7 +118,10 @@ export class SimpleUserService<
       }
       return after(user);
     }
-    if (this.options.allowAnonymousUsers === false) {
+    if (
+      this.options.allowAnonymousUsers === false &&
+      !ctx.forceAllowAnonymous
+    ) {
       throw new BlankReturnMessageDto(
         401,
         'User authentication required',
@@ -256,6 +259,7 @@ export class SimpleUserService<
       ssaid: ctx.ssaid,
       ip: ctx.ip,
       token: undefined,
+      forceAllowAnonymous: true,
     });
 
     const issueTokenForUser = async (user: U) => {
