@@ -11,6 +11,7 @@ import {
   UserLanguageModule,
   UserLanguageProvider,
 } from './user-language/user-language.module';
+import { AragamiModule } from 'nestjs-aragami';
 
 @Module({
   imports: [
@@ -38,8 +39,19 @@ import {
       }),
     }),
     TypeOrmModule.forFeature([Article]),
+    AragamiModule.registerAsync({
+      isGlobal: true,
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => {
+        const redisUrl = config.get<string>('REDIS_URL');
+        return {
+          redis: redisUrl ? { uri: redisUrl } : undefined,
+        };
+      },
+    }),
     SimpleUserModule.registerAsync({
       userClass: AppUser,
+      useExistingAragami: true,
       imports: [UserLanguageModule],
       inject: [UserLanguageProvider.token],
       useFactory: async () => {

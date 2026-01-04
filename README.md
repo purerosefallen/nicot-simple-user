@@ -172,6 +172,151 @@ export class AppModule {}
 
 ---
 
+## ⚠️ About `registerAsync`, request-scoped providers, and Aragami
+
+When using `registerAsync`, **be careful about injecting request-scoped providers**
+(directly or indirectly) into the options factory.
+
+**The core rule**
+
+In NestJS, provider scope is *contagious*:
+
+> If a provider depends on a request-scoped provider, it must also become request-scoped.
+
+This implies:
+
+- If **any token in `registerAsync.inject` is request-scoped**
+- Then the internal `MODULE_OPTIONS_TOKEN` of `nicot-simple-user` **will also become request-scoped**
+- As a result, **the entire dependency chain of this module may be upgraded to request scope**
+
+This can happen *silently*, without any warning.
+
+---
+
+**A common real-world example**
+
+Consider this pattern:
+
+```ts
+SimpleUserModule.registerAsync({
+  imports: [SmtpModule],
+  inject: [SmtpService],
+  useFactory: async (smtp: SmtpService) => ({
+    sendCodeGenerator: async (ctx) => {
+      // ...
+    },
+  }),
+})
+```
+
+At first glance, `SmtpService` looks harmless.
+
+However, in many real projects:
+
+- `SmtpService` depends on an email template renderer
+- which depends on an i18n service
+- which uses a ParamResolver or request context
+- which is **request-scoped**
+
+Once that happens, **the entire `SimpleUserModule` options provider becomes request-scoped**.
+
+---
+
+**Why this is dangerous**
+
+`nicot-simple-user` internally integrates with **Aragami** for:
+
+- sessions
+- verification code storage
+- cooldown / risk control
+- locks and counters
+
+Aragami is designed to be **singleton infrastructure**.
+
+If it is accidentally instantiated or resolved through a request-scoped provider chain,
+you may observe:
+
+- multiple Aragami runtimes
+- duplicated Redis connections
+- inconsistent lock / cooldown behavior
+- subtle bugs that only appear under concurrency
+
+These issues are extremely hard to debug once they occur.
+
+---
+
+**Recommended approach: use an existing Aragami instance**
+
+To avoid scope pollution, the **recommended and safest approach** is:
+
+> **Register Aragami at the application level, and tell `nicot-simple-user` to reuse it.**
+
+That is what `useExistingAragami` is for.
+
+```ts
+@Module({
+  imports: [
+    AragamiModule.registerAsync({
+      isGlobal: true,
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        redis: { uri: config.getOrThrow('REDIS_URL') },
+      }),
+    }),
+
+    SimpleUserModule.registerAsync({
+      useExistingAragami: true,
+
+      imports: [SmtpModule],
+      inject: [SmtpService],
+      useFactory: async (smtp: SmtpService) => ({
+        sendCodeGenerator: async (ctx) => {
+          // ...
+        },
+      }),
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+With this setup:
+
+- Aragami remains **singleton and global**
+- `nicot-simple-user` does **not** attempt to create or configure Aragami
+- even if `sendCodeGenerator` depends on request-scoped services,
+  **Aragami itself is not affected**
+
+---
+
+**Design guideline**
+
+- Module options (`register` / `registerAsync`) should be treated as **startup-time configuration**
+- Request-specific data should flow through **method parameters**, such as:
+  - `SendCodeDto`
+  - request context objects
+  - runtime services resolved at request time
+
+As a rule of thumb:
+
+> If something depends on request context (i18n, tenant, locale, user agent, IP),
+> it should **not** be injected into a module options factory.
+
+---
+
+**Summary**
+
+- Injecting request-scoped providers into `registerAsync` can silently upgrade the entire module to request scope
+- This can break Aragami’s singleton assumptions
+- **The current best practice is:**
+  - register Aragami once at the application level
+  - set `useExistingAragami: true` in `nicot-simple-user`
+
+This keeps infrastructure stable and avoids extremely subtle scope-related bugs.
+
+
+---
+
 ## Request Headers
 
 Clients should send the following headers:

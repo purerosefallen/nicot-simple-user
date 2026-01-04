@@ -62,7 +62,7 @@ export class SimpleUserModule extends ConfigurableModuleClass {
   static register(options: SimpleUserRegisterOptions): DynamicModule {
     const base = super.register(options);
     patchUserCenterControllerMeWithDynamicModule(base);
-    return attachAragamiWithBridge(base, options.reexportAragami);
+    return attachAragamiWithBridge(base, options);
   }
 
   static registerAsync(options: SimpleUserRegisterAsyncOptions): DynamicModule {
@@ -79,6 +79,6 @@ export class SimpleUserModule extends ConfigurableModuleClass {
         }
       }
     }
-    return attachAragamiWithBridge(base, options.reexportAragami);
+    return attachAragamiWithBridge(base, options);
   }
 }

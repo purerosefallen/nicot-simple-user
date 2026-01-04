@@ -1,5 +1,5 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { SimpleUserOptions } from './options';
+import { SimpleUserExtraOptions, SimpleUserOptions } from './options';
 import { AragamiOptions } from 'aragami';
 import { createProvider } from 'nicot';
 import { MODULE_OPTIONS_TOKEN } from './module-builder';
@@ -19,8 +19,9 @@ const ARAGAMI_OPTIONS = Symbol('ARAGAMI_OPTIONS');
 
 export function attachAragamiWithBridge(
   base: DynamicModule,
-  reexport = false,
+  options: SimpleUserExtraOptions,
 ): DynamicModule {
+  if (options.useExistingAragami) return base;
   const baseImports = base.imports ?? [];
   const baseProviders = base.providers ?? [];
 
@@ -51,6 +52,9 @@ export function attachAragamiWithBridge(
         useFactory: (aragamiOptions: AragamiOptions) => aragamiOptions,
       }),
     ],
-    exports: [...(base.exports || []), ...(reexport ? [AragamiModule] : [])],
+    exports: [
+      ...(base.exports || []),
+      ...(options.reexportAragami ? [AragamiModule] : []),
+    ],
   };
 }

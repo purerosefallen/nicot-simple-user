@@ -10,6 +10,7 @@ export interface SimpleUserExtraOptions {
   userConnectionName?: string;
   isGlobal?: boolean;
   reexportAragami?: boolean;
+  useExistingAragami?: boolean;
 }
 
 export interface SimpleUserOptions {
