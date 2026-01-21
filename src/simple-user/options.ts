@@ -3,6 +3,7 @@ import { ClassType } from 'nicot';
 import { SimpleUser } from './simple-user.entity';
 import { CrudOptions } from 'nicot';
 import { SendCodeDto } from './send-code/send-code.dto';
+import { EntityManager } from 'typeorm';
 
 export interface SimpleUserExtraOptions {
   userClass?: ClassType<SimpleUser>;
@@ -28,5 +29,5 @@ export interface SimpleUserOptions {
   passwordBlockTimeMs?: number; // default: 15 minutes
   onMigrateUser?: (oldUser: SimpleUser, newUser: SimpleUser) => Awaitable<void>;
   unregisterWaitTimeMs?: number; // default: 30 days
-  onUnregisterUser?: (user: SimpleUser) => Awaitable<void>;
+  onUnregisterUser?: (user: SimpleUser, tdb: EntityManager) => Awaitable<void>;
 }

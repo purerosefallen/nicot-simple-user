@@ -102,4 +102,11 @@ export class SimpleUser extends IdBase() {
     description: 'Last active time of the user',
   })
   lastActiveTime: Date;
+
+  @InternalColumn()
+  @Index()
+  @DateColumn({
+    description: 'Time when the user was unregistered',
+  })
+  unregisterTime: Date;
 }

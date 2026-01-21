@@ -60,4 +60,14 @@ export class UserCenterController {
   async changeEmail(@DataBody() dto: ChangeEmailDto) {
     return this.userService.changeEmail(this.currentUser, dto);
   }
+
+  @Post('unregister')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Unregister current user',
+  })
+  @ApiBlankResponse()
+  async unregister() {
+    return this.userService.unregister(this.currentUser);
+  }
 }

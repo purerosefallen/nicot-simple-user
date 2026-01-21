@@ -9,7 +9,7 @@ import {
   DataQuery,
 } from 'nicot';
 import { UserExistsDto } from '../simple-user/user-exists.dto';
-import { EmailDto } from '../simple-user/email.dto';
+import { EmailAndCodeDto, EmailDto } from '../simple-user/email.dto';
 import { LoginDto, LoginResponseDto } from '../simple-user/login.dto';
 import {
   ApiRiskControlContext,
@@ -59,5 +59,16 @@ export class LoginController {
   @ApiInvalidCode()
   async resetPassword(@DataBody() dto: ResetPasswordDto) {
     return this.userService.resetPassword(dto);
+  }
+
+  @Post('unregister-with-code')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Unregister user using email code.',
+  })
+  @ApiBlankResponse()
+  @ApiInvalidCode()
+  async unregisterWithCode(@DataBody() dto: EmailAndCodeDto) {
+    return this.userService.unregisterWithEmail(dto);
   }
 }

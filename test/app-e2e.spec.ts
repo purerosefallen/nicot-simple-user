@@ -372,4 +372,50 @@ describe('SimpleUserModule (e2e)', () => {
 
     expectOkEnvelope(newOk.body);
   });
+
+  it('POST /user-center/unregister -> should revoke session and block access', async () => {
+    const loginOk = await request(httpServer)
+      .post('/login')
+      .set('x-client-ssaid', ssaid)
+      .send({ email: currentEmail, password: password2 })
+      .expect(200);
+
+    expectOkEnvelope(loginOk.body);
+    const data = (loginOk.body as GenericReturnMessageDto<LoginResponseDto>)
+      .data;
+    token = data.token;
+
+    const unregister = await request(httpServer)
+      .post('/user-center/unregister')
+      .set('x-client-ssaid', ssaid)
+      .set('x-client-token', token)
+      .expect(200);
+
+    expectOkEnvelope(unregister.body);
+
+    const me = await request(httpServer)
+      .get('/user-center/me')
+      .set('x-client-ssaid', ssaid)
+      .set('x-client-token', token);
+
+    expect(me.status).toBe(401);
+    expectOkEnvelope(me.body);
+  });
+
+  it('POST /login/unregister-with-code -> should succeed even if already unregistered', async () => {
+    const send = await request(httpServer)
+      .post('/send-code/send')
+      .set('x-client-ssaid', ssaid)
+      .send({ email: currentEmail, codePurpose: 'Unregister' })
+      .expect(200);
+
+    expectOkEnvelope(send.body);
+
+    const unregister = await request(httpServer)
+      .post('/login/unregister-with-code')
+      .send({ email: currentEmail, code: TEST_CODE })
+      .expect(200);
+
+    expectOkEnvelope(unregister.body);
+  });
 });

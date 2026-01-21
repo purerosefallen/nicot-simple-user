@@ -7,7 +7,14 @@ import {
   GenericReturnMessageDto,
 } from 'nicot';
 import { SimpleUser } from '../simple-user.entity';
-import { FindOneOptions, FindOptionsWhere, QueryDeepPartialEntity, Repository } from 'typeorm';
+import {
+  FindOneOptions,
+  FindOptionsWhere,
+  IsNull,
+  LessThanOrEqual,
+  QueryDeepPartialEntity,
+  Repository,
+} from 'typeorm';
 import { SimpleUserExtraOptions, SimpleUserOptions } from '../options';
 import { MODULE_OPTIONS_TOKEN } from '../module-builder';
 import { OptionsExToken, UserRepoToken } from '../tokens';
@@ -22,6 +29,7 @@ import { WaitTimeDto } from '../send-code/wait-time.dto';
 import { ChangeEmailDto } from './change-email.dto';
 import { ChangePasswordDto } from './change-password.dto';
 import { ResetPasswordDto } from './reset-password.dto';
+import { EmailAndCodeDto } from './email.dto';
 
 class LoginSession {
   @CacheKey()
@@ -91,6 +99,7 @@ export class SimpleUserService<
         {
           lastActiveIpAddress: user.lastActiveIpAddress,
           lastActiveTime: user.lastActiveTime,
+          unregisterTime: null,
         } as Partial<U> as QueryDeepPartialEntity<U>,
       );
       const fn = this.options.afterPutUser || ((u) => u);
@@ -113,7 +122,7 @@ export class SimpleUserService<
         ...findOptions,
         where: { id: session.userId } as FindOptionsWhere<U>,
       });
-      if (!user) {
+      if (!user || this.isUserExpired(user)) {
         throw401();
       }
       return after(user);
@@ -161,7 +170,7 @@ export class SimpleUserService<
       ...findOptions,
       where: { id } as FindOptionsWhere<U>,
     });
-    if (!user) {
+    if (!user || this.isUserExpired(user)) {
       throw new BlankReturnMessageDto(404, 'User not found.').toException();
     }
     return user;
@@ -243,6 +252,24 @@ export class SimpleUserService<
     }
   }
 
+  private unregisterWaitTimeMs =
+    this.options.unregisterWaitTimeMs || 30 * 24 * 60 * 60 * 1000;
+
+  private getUnregisterTimeCondition() {
+    return {
+      unregisterTime: LessThanOrEqual(
+        new Date(Date.now() - this.unregisterWaitTimeMs),
+      ),
+    } as FindOptionsWhere<U>;
+  }
+
+  private isUserExpired(user: U) {
+    return (
+      user?.unregisterTime &&
+      user.unregisterTime.getTime() + this.unregisterWaitTimeMs < Date.now()
+    );
+  }
+
   async login(dto: LoginDto, ctx: UserRiskControlContext) {
     if (!dto.code && !dto.password) {
       throw new BlankReturnMessageDto(
@@ -251,10 +278,15 @@ export class SimpleUserService<
       ).toException();
     }
 
-    const user = await this.repo.findOne({
+    let user = await this.repo.findOne({
       ...this.getFindOptions(),
       where: { email: dto.email } as FindOptionsWhere<U>,
     });
+
+    if (this.isUserExpired(user)) {
+      user = undefined;
+    }
+
     const anonymousUser = await this.findOrCreateUser({
       ssaid: ctx.ssaid,
       ip: ctx.ip,
@@ -329,6 +361,17 @@ export class SimpleUserService<
           'Please provide code or password to login.',
         ).toException();
       }
+      if (user.unregisterTime) {
+        // clean up unregisterTime to recover user
+        await this.repo.update(
+          {
+            id: user.id,
+          } as FindOptionsWhere<U>,
+          {
+            unregisterTime: null,
+          } as Partial<U> as QueryDeepPartialEntity<U>,
+        );
+      }
       await this.options.onMigrateUser?.(anonymousUser, user);
       return issueTokenForUser(user);
     } else {
@@ -344,6 +387,13 @@ export class SimpleUserService<
         await anonymousUser.setPassword(dto.setPassword);
       }
       await this._mayBeTransaction(async (db, repo) => {
+        // clean up old unregistered users with the same email
+        await repo.delete({
+          email: dto.email,
+          unregisterTime: LessThanOrEqual(
+            new Date(Date.now() - this.unregisterWaitTimeMs),
+          ),
+        } as FindOptionsWhere<U>);
         await repo.update(
           {
             id: anonymousUser.id,
@@ -356,9 +406,10 @@ export class SimpleUserService<
             ssaid: null,
             registerIpAddress: ctx.ip,
             registerTime: new Date(),
+            unregisterTime: null, // in case of recovering unregistered user
           } as Partial<U> as QueryDeepPartialEntity<U>,
         );
-      })
+      });
       return issueTokenForUser(anonymousUser);
     }
   }
@@ -452,5 +503,43 @@ export class SimpleUserService<
     );
     await this.kickUserEmail(dto.email);
     return new BlankReturnMessageDto(200, 'success');
+  }
+
+  async unregister(user: U, tdb = this.repo.manager) {
+    return this._mayBeTransaction(async (db, repo) => {
+      user.unregisterTime = new Date();
+      await repo.update(
+        {
+          id: user.id,
+        } as FindOptionsWhere<U>,
+        {
+          unregisterTime: user.unregisterTime,
+        } as Partial<U> as QueryDeepPartialEntity<U>,
+      );
+      await this.kickUserEmail(user.email);
+      await this.options.onUnregisterUser?.(user, tdb);
+      return new BlankReturnMessageDto(200, 'success');
+    }, tdb);
+  }
+
+  async unregisterWithEmail(dto: EmailAndCodeDto) {
+    await this.sendCodeService.verifyCode({
+      email: dto.email,
+      code: dto.code,
+      codePurpose: CodePurpose.Unregister,
+    });
+    return this._mayBeTransaction(async (db, repo) => {
+      const user = await repo.findOne({
+        where: {
+          email: dto.email,
+          unregisterTime: IsNull(),
+        } as FindOptionsWhere<U>,
+      });
+      if (!user) {
+        // this is already unregistered or not exist, so we silently return success
+        return new BlankReturnMessageDto(200, 'success');
+      }
+      return this.unregister(user, db);
+    });
   }
 }
