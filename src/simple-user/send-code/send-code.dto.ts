@@ -6,6 +6,7 @@ export enum CodePurpose {
   Login = 'Login',
   ResetPassword = 'ResetPassword',
   ChangeEmail = 'ChangeEmail',
+  Unregister = 'Unregister',
 }
 
 export class SendCodeDto extends EmailDto {

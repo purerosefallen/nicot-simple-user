@@ -27,4 +27,6 @@ export interface SimpleUserOptions {
   passwordMaxAttempts?: number; // default: 5
   passwordBlockTimeMs?: number; // default: 15 minutes
   onMigrateUser?: (oldUser: SimpleUser, newUser: SimpleUser) => Awaitable<void>;
+  unregisterWaitTimeMs?: number; // default: 30 days
+  onUnregisterUser?: (user: SimpleUser) => Awaitable<void>;
 }

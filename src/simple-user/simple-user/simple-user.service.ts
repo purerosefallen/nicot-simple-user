@@ -7,7 +7,7 @@ import {
   GenericReturnMessageDto,
 } from 'nicot';
 import { SimpleUser } from '../simple-user.entity';
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindOneOptions, FindOptionsWhere, QueryDeepPartialEntity, Repository } from 'typeorm';
 import { SimpleUserExtraOptions, SimpleUserOptions } from '../options';
 import { MODULE_OPTIONS_TOKEN } from '../module-builder';
 import { OptionsExToken, UserRepoToken } from '../tokens';
@@ -87,11 +87,11 @@ export class SimpleUserService<
       await this.repo.update(
         {
           id: user.id,
-        } as any,
+        } as FindOptionsWhere<U>,
         {
           lastActiveIpAddress: user.lastActiveIpAddress,
           lastActiveTime: user.lastActiveTime,
-        } as any,
+        } as Partial<U> as QueryDeepPartialEntity<U>,
       );
       const fn = this.options.afterPutUser || ((u) => u);
       const res = await fn(user);
@@ -111,7 +111,7 @@ export class SimpleUserService<
       }
       const user = await this.repo.findOne({
         ...findOptions,
-        where: { id: session.userId } as any,
+        where: { id: session.userId } as FindOptionsWhere<U>,
       });
       if (!user) {
         throw401();
@@ -131,7 +131,7 @@ export class SimpleUserService<
     const getExistingUser = (repo = this.repo) =>
       repo.findOne({
         ...findOptions,
-        where: { ssaid: ctx.ssaid } as any,
+        where: { ssaid: ctx.ssaid } as FindOptionsWhere<U>,
       });
 
     const existingUser = await getExistingUser();
@@ -159,7 +159,7 @@ export class SimpleUserService<
     const findOptions = this.getFindOptions();
     const user = await this.repo.findOne({
       ...findOptions,
-      where: { id } as any,
+      where: { id } as FindOptionsWhere<U>,
     });
     if (!user) {
       throw new BlankReturnMessageDto(404, 'User not found.').toException();
@@ -169,7 +169,7 @@ export class SimpleUserService<
 
   async checkUserExists(email: string) {
     const res = await this.repo.exists({
-      where: { email } as any,
+      where: { email } as FindOptionsWhere<U>,
     });
 
     return new GenericReturnMessageDto(200, 'success', { exists: res });
@@ -253,7 +253,7 @@ export class SimpleUserService<
 
     const user = await this.repo.findOne({
       ...this.getFindOptions(),
-      where: { email: dto.email } as any,
+      where: { email: dto.email } as FindOptionsWhere<U>,
     });
     const anonymousUser = await this.findOrCreateUser({
       ssaid: ctx.ssaid,
@@ -266,11 +266,11 @@ export class SimpleUserService<
       await this.repo.update(
         {
           id: user.id,
-        } as any,
+        } as FindOptionsWhere<U>,
         {
           loginIpAddress: ctx.ip,
           loginTime: new Date(),
-        } as any,
+        } as Partial<U> as QueryDeepPartialEntity<U>,
       );
       const token = cryptoRandomString({
         length: 64,
@@ -343,20 +343,22 @@ export class SimpleUserService<
       if (dto.setPassword) {
         await anonymousUser.setPassword(dto.setPassword);
       }
-      await this.repo.update(
-        {
-          id: anonymousUser.id,
-        } as any,
-        {
-          email: dto.email,
-          ...(dto.setPassword
-            ? { passwordHash: anonymousUser.passwordHash }
-            : {}),
-          ssaid: null,
-          registerIpAddress: ctx.ip,
-          registerTime: new Date(),
-        } as any,
-      );
+      await this._mayBeTransaction(async (db, repo) => {
+        await repo.update(
+          {
+            id: anonymousUser.id,
+          } as FindOptionsWhere<U>,
+          {
+            email: dto.email,
+            ...(dto.setPassword
+              ? { passwordHash: anonymousUser.passwordHash }
+              : {}),
+            ssaid: null,
+            registerIpAddress: ctx.ip,
+            registerTime: new Date(),
+          } as Partial<U> as QueryDeepPartialEntity<U>,
+        );
+      })
       return issueTokenForUser(anonymousUser);
     }
   }
@@ -376,10 +378,10 @@ export class SimpleUserService<
     await this.repo.update(
       {
         id: user.id,
-      } as any,
+      } as FindOptionsWhere<U>,
       {
         email: dto.email,
-      } as any,
+      } as Partial<U> as QueryDeepPartialEntity<U>,
     );
     return new BlankReturnMessageDto(200, 'success');
   }
@@ -421,10 +423,10 @@ export class SimpleUserService<
     await this.repo.update(
       {
         id: user.id,
-      } as any,
+      } as FindOptionsWhere<U>,
       {
         passwordHash: user.passwordHash,
-      } as any,
+      } as Partial<U> as QueryDeepPartialEntity<U>,
     );
     await this.kickUserEmail(user.email);
     return new BlankReturnMessageDto(200, 'success');
@@ -443,10 +445,10 @@ export class SimpleUserService<
     await this.repo.update(
       {
         email: dto.email,
-      } as any,
+      } as FindOptionsWhere<U>,
       {
         passwordHash: dummyUser.passwordHash,
-      } as any,
+      } as Partial<U> as QueryDeepPartialEntity<U>,
     );
     await this.kickUserEmail(dto.email);
     return new BlankReturnMessageDto(200, 'success');
