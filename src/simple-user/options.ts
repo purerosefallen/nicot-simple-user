@@ -4,6 +4,7 @@ import { SimpleUser } from './simple-user.entity';
 import { CrudOptions } from 'nicot';
 import { SendCodeDto } from './send-code/send-code.dto';
 import { EntityManager } from 'typeorm';
+import { MayBeArray } from 'aragami/dist/src/utility/utility';
 
 export interface SimpleUserExtraOptions {
   userClass?: ClassType<SimpleUser>;
@@ -30,4 +31,5 @@ export interface SimpleUserOptions {
   onMigrateUser?: (oldUser: SimpleUser, newUser: SimpleUser) => Awaitable<void>;
   unregisterWaitTimeMs?: number; // default: 30 days
   onUnregisterUser?: (user: SimpleUser, tdb: EntityManager) => Awaitable<void>;
+  initialUser?: MayBeArray<Partial<SimpleUser>>;
 }

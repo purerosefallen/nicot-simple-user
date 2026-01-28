@@ -3,16 +3,21 @@ import {
   IdBase,
   InternalColumn,
   NotColumn,
+  NotInResult,
+  NotQueryable,
   NotWritable,
   StringColumn,
 } from 'nicot';
 import { Entity, Index } from 'typeorm';
 import argon2 from 'argon2';
+import { ApiProperty } from '@nestjs/swagger';
+
+// must omit in user write views
+export const SimpleUserSensitiveFields = ['email', 'password'] as const;
 
 @Entity()
 export class SimpleUser extends IdBase() {
   @Index()
-  @NotWritable()
   @StringColumn(255, {
     description:
       'Email address of the user. Only available for registered users',
@@ -39,7 +44,36 @@ export class SimpleUser extends IdBase() {
   })
   passwordSet: boolean;
 
+  @NotColumn({
+    description: 'Indicates whether the user is registered (has email)',
+    required: true,
+  })
+  registered: boolean;
+
+  @NotQueryable()
+  @NotInResult()
+  @ApiProperty({
+    description: 'Set password for the user. Write-only field.',
+  })
+  password: string;
+
+  private async setPasswordWhenAvailable() {
+    if (this.password) {
+      await this.setPassword(this.password);
+      delete this.password;
+    }
+  }
+
+  async beforeCreate() {
+    await this.setPasswordWhenAvailable();
+  }
+
+  async beforeUpdate() {
+    await this.setPasswordWhenAvailable();
+  }
+
   async afterGet() {
+    this.registered = !!this.email;
     this.passwordSet = !!this.passwordHash;
   }
 

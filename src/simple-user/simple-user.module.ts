@@ -22,6 +22,7 @@ import { OptionsExToken } from './tokens';
 import { ValueProvider } from '@nestjs/common/interfaces/modules/provider.interface';
 import { patchUserCenterControllerMe } from './user-center/patch-me';
 import { addInjectionTokenMapping, ApiFromProvider } from 'nicot';
+import { SimpleUserInitialCreationService } from './simple-user-initial-creation/simple-user-initial-creation.service';
 
 export type SimpleUserRegisterOptions = Parameters<
   typeof ConfigurableModuleClass.register
@@ -50,6 +51,7 @@ const controllers = [SendCodeController, LoginController, UserCenterController];
     SendCodeService,
     userResolverProvider.provider,
     userRiskControlResolverProvider.provider,
+    SimpleUserInitialCreationService,
   ],
   exports: [
     SimpleUserService,

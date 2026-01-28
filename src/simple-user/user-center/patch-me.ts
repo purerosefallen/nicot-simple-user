@@ -4,14 +4,17 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import { SimpleUserExtraOptions } from '../options';
 
 export const patchUserCenterControllerMe = (extras: SimpleUserExtraOptions) => {
+  const factory = new RestfulFactory(extras.userClass, {
+    relations: extras.userServiceCrudExtras?.relations || [],
+  });
+
   const userCenterControllerMeDescriptor = Object.getOwnPropertyDescriptor(
     UserCenterController.prototype,
     'getCurrentUser',
   );
+
   ApiOkResponse({
-    type: new RestfulFactory(extras.userClass, {
-      relations: extras.userServiceCrudExtras?.relations || [],
-    }).entityReturnMessageDto,
+    type: factory.entityReturnMessageDto,
   })(
     UserCenterController.prototype,
     'getCurrentUser',
