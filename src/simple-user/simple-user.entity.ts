@@ -6,6 +6,7 @@ import {
   NotInResult,
   NotQueryable,
   NotWritable,
+  QueryEqual,
   StringColumn,
 } from 'nicot';
 import { Entity, Index } from 'typeorm';
@@ -17,6 +18,7 @@ export const SimpleUserSensitiveFields = ['email', 'password'] as const;
 
 @Entity()
 export class SimpleUser extends IdBase() {
+  @QueryEqual()
   @Index()
   @StringColumn(255, {
     description:
