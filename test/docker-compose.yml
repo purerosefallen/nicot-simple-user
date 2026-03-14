@@ -1,0 +1,14 @@
+version: '2.4'
+
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '127.0.0.1:5432:5432'
+
+  redis:
+    image: redis:alpine
+    ports:
+      - '127.0.0.1:6379:6379'
