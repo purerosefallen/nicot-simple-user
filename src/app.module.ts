@@ -56,11 +56,18 @@ import { AragamiModule } from 'nestjs-aragami';
       inject: [UserLanguageProvider.token],
       useFactory: async () => {
         return {
+          sendCodeCooldownTimeMs: 0,
           sendCodeGenerator: (ctx) => {
             console.log(
-              `Generating code for ${ctx.email} on ${ctx.codePurpose}`,
+              `Generating email code for ${ctx.email} on ${ctx.codePurpose}`,
             );
             return '123456';
+          },
+          sendSmsCodeGenerator: (ctx) => {
+            console.log(
+              `Generating SMS code for ${ctx.mobile} on ${ctx.codePurpose}`,
+            );
+            return '654321';
           },
         };
       },

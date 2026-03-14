@@ -195,9 +195,9 @@ export class SimpleUserService<
     return new GenericReturnMessageDto(200, 'success', { exists: res });
   }
 
-  private passwordMaxAttempts = this.options.passwordMaxAttempts || 5;
+  private passwordMaxAttempts = this.options.passwordMaxAttempts ?? 5;
   private passwordBlockTimeMs =
-    this.options.passwordBlockTimeMs || 15 * 60 * 1000;
+    this.options.passwordBlockTimeMs ?? 15 * 60 * 1000;
 
   private async checkPasswordRiskControl(ctx: UserRiskControlContext, user: U) {
     const riskControlKeys = [
@@ -264,7 +264,7 @@ export class SimpleUserService<
   }
 
   private unregisterWaitTimeMs =
-    this.options.unregisterWaitTimeMs || 30 * 24 * 60 * 60 * 1000;
+    this.options.unregisterWaitTimeMs ?? 30 * 24 * 60 * 60 * 1000;
 
   private getUnregisterTimeCondition() {
     return {
@@ -457,7 +457,7 @@ export class SimpleUserService<
     session.token = token;
     session.userId = user.id;
     const loginExpiryTimeMs =
-      this.options.loginExpiryTimeMs || 30 * 24 * 60 * 60 * 1000;
+      this.options.loginExpiryTimeMs ?? 30 * 24 * 60 * 60 * 1000;
     await this.aragami.set(session, {
       ttl: loginExpiryTimeMs,
     });
@@ -480,7 +480,9 @@ export class SimpleUserService<
     );
     const res = new LoginResponseDto();
     res.token = token;
-    res.tokenExpiresAt = new Date(Date.now() + loginExpiryTimeMs);
+    res.tokenExpiresAt = loginExpiryTimeMs
+      ? new Date(Date.now() + loginExpiryTimeMs)
+      : new Date(8640000000000000);
     res.userId = user.id;
     return new GenericReturnMessageDto(200, 'success', res);
   }

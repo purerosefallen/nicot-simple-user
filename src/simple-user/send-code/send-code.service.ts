@@ -46,9 +46,9 @@ export class SendCodeService {
   private logger = new ConsoleLogger('SendCodeService');
 
   private sendCodeValidTimeMs =
-    this.options.sendCodeValidTimeMs || 10 * 60 * 1000; // default: 10 minutes
+    this.options.sendCodeValidTimeMs ?? 10 * 60 * 1000; // default: 10 minutes
   private sendCodeCooldownTimeMs =
-    this.options.sendCodeCooldownTimeMs || 60 * 1000; // default: 1 minute
+    this.options.sendCodeCooldownTimeMs ?? 60 * 1000; // default: 1 minute
 
   async sendCode(dto: SendCodeDto, riskControlContext: UserRiskControlContext) {
     const riskControlKeys = [
@@ -140,9 +140,9 @@ export class SendCodeService {
     }
   }
 
-  private verifyCodeMaxAttempts = this.options.verifyCodeMaxAttempts || 5; // default: 5
+  private verifyCodeMaxAttempts = this.options.verifyCodeMaxAttempts ?? 5; // default: 5
   private verifyCodeBlockTimeMs =
-    this.options.verifyCodeBlockTimeMs || 15 * 60 * 1000; // default: 15 minutes
+    this.options.verifyCodeBlockTimeMs ?? 15 * 60 * 1000; // default: 15 minutes
 
   async verifyCode(dto: CodeContext, noConsume = false) {
     const key = buildSendCodeCacheKey(dto);
