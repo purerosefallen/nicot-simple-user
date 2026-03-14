@@ -27,9 +27,14 @@ import { CodePurpose } from '../send-code/send-code.dto';
 import cryptoRandomString from 'crypto-random-string';
 import { WaitTimeDto } from '../send-code/wait-time.dto';
 import { ChangeEmailDto } from './change-email.dto';
+import { ChangeMobileDto } from './change-mobile.dto';
 import { ChangePasswordDto } from './change-password.dto';
 import { ResetPasswordDto } from './reset-password.dto';
-import { EmailAndCodeDto } from './email.dto';
+import {
+  ContactAndCodeDto,
+  ContactDto,
+  getContactKey,
+} from './contact.dto';
 
 class LoginSession {
   @CacheKey()
@@ -37,13 +42,13 @@ class LoginSession {
   userId: number;
 }
 
-class LoginSessionByEmail {
+class LoginSessionByContact {
   token: string;
-  email: string;
+  contactKey: string;
 
   @CacheKey()
-  userIdKey() {
-    return `${this.email}:${this.token}`;
+  cacheKey() {
+    return `${this.contactKey}:${this.token}`;
   }
 }
 
@@ -176,9 +181,15 @@ export class SimpleUserService<
     return user;
   }
 
-  async checkUserExists(email: string) {
+  private getContactWhere(dto: ContactDto) {
+    return (
+      dto.email ? { email: dto.email } : { mobile: dto.mobile }
+    ) as FindOptionsWhere<U>;
+  }
+
+  async checkUserExists(dto: ContactDto) {
     const res = await this.repo.exists({
-      where: { email } as FindOptionsWhere<U>,
+      where: this.getContactWhere(dto),
     });
 
     return new GenericReturnMessageDto(200, 'success', { exists: res });
@@ -278,9 +289,11 @@ export class SimpleUserService<
       ).toException();
     }
 
+    const contactWhere = this.getContactWhere(dto);
+
     let user = await this.repo.findOne({
       ...this.getFindOptions(),
-      where: { email: dto.email } as FindOptionsWhere<U>,
+      where: contactWhere,
     });
 
     if (this.isUserExpired(user)) {
@@ -294,48 +307,9 @@ export class SimpleUserService<
       forceAllowAnonymous: true,
     });
 
-    const issueTokenForUser = async (user: U) => {
-      await this.repo.update(
-        {
-          id: user.id,
-        } as FindOptionsWhere<U>,
-        {
-          loginIpAddress: ctx.ip,
-          loginTime: new Date(),
-        } as Partial<U> as QueryDeepPartialEntity<U>,
-      );
-      const token = cryptoRandomString({
-        length: 64,
-        type: 'alphanumeric',
-      });
-      const session = new LoginSession();
-      session.token = token;
-      session.userId = user.id;
-      const loginExpiryTimeMs =
-        this.options.loginExpiryTimeMs || 30 * 24 * 60 * 60 * 1000;
-      await this.aragami.set(session, {
-        ttl: loginExpiryTimeMs,
-      });
-      await this.aragami.set(
-        LoginSessionByEmail,
-        {
-          token: token,
-          email: user.email,
-        },
-        {
-          ttl: loginExpiryTimeMs,
-        },
-      );
-      const res = new LoginResponseDto();
-      res.token = token;
-      res.tokenExpiresAt = new Date(Date.now() + loginExpiryTimeMs);
-      res.userId = user.id;
-      return new GenericReturnMessageDto(200, 'success', res);
-    };
-
     const verifyCode = () =>
       this.sendCodeService.verifyCode({
-        email: dto.email,
+        ...(dto.email ? { email: dto.email } : { mobile: dto.mobile }),
         code: dto.code,
         codePurpose: CodePurpose.Login,
       });
@@ -373,7 +347,7 @@ export class SimpleUserService<
         );
       }
       await this.options.onMigrateUser?.(anonymousUser, user);
-      return issueTokenForUser(user);
+      return this.issueTokenForUser(user, ctx);
     } else {
       // new user
       if (!dto.code) {
@@ -386,10 +360,13 @@ export class SimpleUserService<
       if (dto.setPassword) {
         await anonymousUser.setPassword(dto.setPassword);
       }
+      const contactFields = dto.email
+        ? { email: dto.email }
+        : { mobile: dto.mobile };
       await this._mayBeTransaction(async (db, repo) => {
-        // clean up old unregistered users with the same email
+        // clean up old unregistered users with the same contact
         await repo.delete({
-          email: dto.email,
+          ...contactFields,
           unregisterTime: LessThanOrEqual(
             new Date(Date.now() - this.unregisterWaitTimeMs),
           ),
@@ -399,7 +376,7 @@ export class SimpleUserService<
             id: anonymousUser.id,
           } as FindOptionsWhere<U>,
           {
-            email: dto.email,
+            ...contactFields,
             ...(dto.setPassword
               ? { passwordHash: anonymousUser.passwordHash }
               : {}),
@@ -410,7 +387,9 @@ export class SimpleUserService<
           } as Partial<U> as QueryDeepPartialEntity<U>,
         );
       });
-      return issueTokenForUser(anonymousUser);
+      if (dto.email) anonymousUser.email = dto.email;
+      if (dto.mobile) anonymousUser.mobile = dto.mobile;
+      return this.issueTokenForUser(anonymousUser, ctx);
     }
   }
 
@@ -437,15 +416,93 @@ export class SimpleUserService<
     return new BlankReturnMessageDto(200, 'success');
   }
 
-  async kickUserEmail(email: string) {
+  async changeMobile(user: U, dto: ChangeMobileDto) {
+    if (!user.isRegistered()) {
+      throw new BlankReturnMessageDto(
+        402,
+        'Not allowed to change mobile for anonymous user.',
+      ).toException();
+    }
+    await this.sendCodeService.verifyCode({
+      mobile: dto.mobile,
+      code: dto.code,
+      codePurpose: CodePurpose.ChangeMobile,
+    });
+    await this.repo.update(
+      {
+        id: user.id,
+      } as FindOptionsWhere<U>,
+      {
+        mobile: dto.mobile,
+      } as Partial<U> as QueryDeepPartialEntity<U>,
+    );
+    return new BlankReturnMessageDto(200, 'success');
+  }
+
+  async issueTokenForUser(user: U, ctx: UserRiskControlContext) {
+    await this.repo.update(
+      {
+        id: user.id,
+      } as FindOptionsWhere<U>,
+      {
+        loginIpAddress: ctx.ip,
+        loginTime: new Date(),
+      } as Partial<U> as QueryDeepPartialEntity<U>,
+    );
+    const token = cryptoRandomString({
+      length: 64,
+      type: 'alphanumeric',
+    });
+    const session = new LoginSession();
+    session.token = token;
+    session.userId = user.id;
+    const loginExpiryTimeMs =
+      this.options.loginExpiryTimeMs || 30 * 24 * 60 * 60 * 1000;
+    await this.aragami.set(session, {
+      ttl: loginExpiryTimeMs,
+    });
+    const contactKeys: string[] = [];
+    if (user.email) contactKeys.push(`email:${user.email}`);
+    if (user.mobile) contactKeys.push(`mobile:${user.mobile}`);
+    await Promise.all(
+      contactKeys.map((contactKey) =>
+        this.aragami.set(
+          LoginSessionByContact,
+          {
+            token: token,
+            contactKey: contactKey,
+          },
+          {
+            ttl: loginExpiryTimeMs,
+          },
+        ),
+      ),
+    );
+    const res = new LoginResponseDto();
+    res.token = token;
+    res.tokenExpiresAt = new Date(Date.now() + loginExpiryTimeMs);
+    res.userId = user.id;
+    return new GenericReturnMessageDto(200, 'success', res);
+  }
+
+  private async kickByContactKey(contactKey: string) {
     const allSessions = await this.aragami.values(
-      LoginSessionByEmail,
-      `${email}:`,
+      LoginSessionByContact,
+      `${contactKey}:`,
     );
     await Promise.all(
       allSessions.map((s) => this.aragami.del(LoginSession, s.token)),
     );
-    await this.aragami.clear(LoginSessionByEmail, `${email}:`);
+    await this.aragami.clear(LoginSessionByContact, `${contactKey}:`);
+  }
+
+  async kickUser(user: U) {
+    const promises: Promise<void>[] = [];
+    if (user.email)
+      promises.push(this.kickByContactKey(`email:${user.email}`));
+    if (user.mobile)
+      promises.push(this.kickByContactKey(`mobile:${user.mobile}`));
+    await Promise.all(promises);
   }
 
   async changePassword(
@@ -479,13 +536,13 @@ export class SimpleUserService<
         passwordHash: user.passwordHash,
       } as Partial<U> as QueryDeepPartialEntity<U>,
     );
-    await this.kickUserEmail(user.email);
+    await this.kickUser(user);
     return new BlankReturnMessageDto(200, 'success');
   }
 
   async resetPassword(dto: ResetPasswordDto) {
     await this.sendCodeService.verifyCode({
-      email: dto.email,
+      ...(dto.email ? { email: dto.email } : { mobile: dto.mobile }),
       code: dto.code,
       codePurpose: CodePurpose.ResetPassword,
     });
@@ -493,15 +550,11 @@ export class SimpleUserService<
     const dummyUser = new this.optionsEx.userClass() as U;
     await dummyUser.setPassword(dto.newPassword);
 
-    await this.repo.update(
-      {
-        email: dto.email,
-      } as FindOptionsWhere<U>,
-      {
-        passwordHash: dummyUser.passwordHash,
-      } as Partial<U> as QueryDeepPartialEntity<U>,
-    );
-    await this.kickUserEmail(dto.email);
+    const contactWhere = this.getContactWhere(dto);
+    await this.repo.update(contactWhere, {
+      passwordHash: dummyUser.passwordHash,
+    } as Partial<U> as QueryDeepPartialEntity<U>);
+    await this.kickByContactKey(getContactKey(dto));
     return new BlankReturnMessageDto(200, 'success');
   }
 
@@ -516,22 +569,22 @@ export class SimpleUserService<
           unregisterTime: user.unregisterTime,
         } as Partial<U> as QueryDeepPartialEntity<U>,
       );
-      await this.kickUserEmail(user.email);
+      await this.kickUser(user);
       await this.options.onUnregisterUser?.(user, tdb);
       return new BlankReturnMessageDto(200, 'success');
     }, tdb);
   }
 
-  async unregisterWithEmail(dto: EmailAndCodeDto) {
+  async unregisterWithCode(dto: ContactAndCodeDto) {
     await this.sendCodeService.verifyCode({
-      email: dto.email,
+      ...(dto.email ? { email: dto.email } : { mobile: dto.mobile }),
       code: dto.code,
       codePurpose: CodePurpose.Unregister,
     });
     return this._mayBeTransaction(async (db, repo) => {
       const user = await repo.findOne({
         where: {
-          email: dto.email,
+          ...this.getContactWhere(dto),
           unregisterTime: IsNull(),
         } as FindOptionsWhere<U>,
       });

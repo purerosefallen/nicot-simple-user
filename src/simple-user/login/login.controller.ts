@@ -9,7 +9,7 @@ import {
   DataQuery,
 } from 'nicot';
 import { UserExistsDto } from '../simple-user/user-exists.dto';
-import { EmailAndCodeDto, EmailDto } from '../simple-user/email.dto';
+import { ContactDto, ContactAndCodeDto } from '../simple-user/contact.dto';
 import { LoginDto, LoginResponseDto } from '../simple-user/login.dto';
 import {
   ApiRiskControlContext,
@@ -26,11 +26,11 @@ export class LoginController {
 
   @Get('user-exists')
   @ApiOperation({
-    summary: 'Check if a user exists by email',
+    summary: 'Check if a user exists by email or mobile',
   })
   @ApiTypeResponse(UserExistsDto)
-  async checkUserExists(@DataQuery() dto: EmailDto) {
-    return this.userService.checkUserExists(dto.email);
+  async checkUserExists(@DataQuery() dto: ContactDto) {
+    return this.userService.checkUserExists(dto);
   }
 
   @Post()
@@ -53,7 +53,7 @@ export class LoginController {
   @Post('reset-password')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Reset user password using email code.',
+    summary: 'Reset user password using email or mobile code.',
   })
   @ApiBlankResponse()
   @ApiInvalidCode()
@@ -64,11 +64,11 @@ export class LoginController {
   @Post('unregister-with-code')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Unregister user using email code.',
+    summary: 'Unregister user using email or mobile code.',
   })
   @ApiBlankResponse()
   @ApiInvalidCode()
-  async unregisterWithCode(@DataBody() dto: EmailAndCodeDto) {
-    return this.userService.unregisterWithEmail(dto);
+  async unregisterWithCode(@DataBody() dto: ContactAndCodeDto) {
+    return this.userService.unregisterWithCode(dto);
   }
 }

@@ -1,14 +1,14 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { EmailDto } from './email.dto';
+import { ContactDto } from './contact.dto';
 
-export class LoginDto extends EmailDto {
+export class LoginDto extends ContactDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
     description:
-      'The login code sent to the email address (MUST present if no password)',
+      'The login code sent to the email or mobile (MUST present if no password)',
     example: '123456',
   })
   code?: string;

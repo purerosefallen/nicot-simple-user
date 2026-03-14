@@ -9,11 +9,13 @@ import { WaitTimeDto } from './wait-time.dto';
 import { BlankReturnMessageDto } from 'nicot';
 import { CodeContext } from './code-context';
 import { UserRiskControlContext } from '../resolver';
+import { getContactKey, getContactTarget } from '../simple-user/contact.dto';
 
 const buildSendCodeCacheKey = (ctx: {
-  email: string;
+  email?: string;
+  mobile?: string;
   codePurpose: CodePurpose;
-}) => `email:${ctx.email}:${ctx.codePurpose}`;
+}) => `${getContactKey(ctx)}:${ctx.codePurpose}`;
 
 class SendCodeRecord extends SendCodeDto {
   sentTime: Date;
@@ -77,16 +79,39 @@ export class SendCodeService {
         ).toException();
       }
     }
-    if (!this.options.sendCodeGenerator) {
-      throw new BlankReturnMessageDto(
-        501,
-        'Send code generator not configured',
-      ).toException();
-    }
+
+    const generateCode = dto.email
+      ? () => {
+          if (!this.options.sendCodeGenerator) {
+            throw new BlankReturnMessageDto(
+              501,
+              'Send code generator not configured',
+            ).toException();
+          }
+          return this.options.sendCodeGenerator({
+            email: dto.email,
+            codePurpose: dto.codePurpose,
+          });
+        }
+      : () => {
+          if (!this.options.sendSmsCodeGenerator) {
+            throw new BlankReturnMessageDto(
+              501,
+              'SMS code generator not configured',
+            ).toException();
+          }
+          return this.options.sendSmsCodeGenerator({
+            mobile: dto.mobile,
+            codePurpose: dto.codePurpose,
+          });
+        };
+
+    const target = getContactTarget(dto);
     try {
-      const code = await this.options.sendCodeGenerator(dto);
+      const code = await generateCode();
       const record = new SendCodeRecord();
       record.email = dto.email;
+      record.mobile = dto.mobile;
       record.codePurpose = dto.codePurpose;
       record.code = code;
       record.sentTime = new Date();
@@ -106,7 +131,7 @@ export class SendCodeService {
       return new BlankReturnMessageDto(200, 'success');
     } catch (e) {
       this.logger.error(
-        `Failed to send code to ${dto.email} for purpose ${dto.codePurpose}: ${e}`,
+        `Failed to send code to ${target} for purpose ${dto.codePurpose}: ${e}`,
       );
       throw new GenericReturnMessageDto(
         501,
@@ -145,13 +170,17 @@ export class SendCodeService {
       if (this.verifyCodeMaxAttempts && this.verifyCodeBlockTimeMs) {
         const attemptRecord = new VerifyCodeAttemptRecord();
         attemptRecord.email = dto.email;
+        attemptRecord.mobile = dto.mobile;
         attemptRecord.codePurpose = dto.codePurpose;
         attemptRecord.time = new Date();
         await this.aragami.set(attemptRecord, {
           ttl: this.verifyCodeBlockTimeMs,
         });
       }
-      throw new BlankReturnMessageDto(403, 'Invalid email code').toException();
+      throw new BlankReturnMessageDto(
+        403,
+        'Invalid verification code',
+      ).toException();
     }
     // this is success route
     if (!noConsume) {

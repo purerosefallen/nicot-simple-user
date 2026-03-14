@@ -171,6 +171,9 @@ describe('SimpleUserModule (e2e)', () => {
       .data;
     expect(data.token).toHaveLength(64);
 
+    // changePassword kicks all sessions, so update token
+    token = data.token;
+
     // 用错密码应 403
     const loginBad = await request(httpServer)
       .post('/login')

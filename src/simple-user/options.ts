@@ -2,7 +2,7 @@ import { AragamiOptions, Awaitable } from 'aragami';
 import { ClassType } from 'nicot';
 import { SimpleUser } from './simple-user.entity';
 import { CrudOptions } from 'nicot';
-import { SendCodeDto } from './send-code/send-code.dto';
+import { EmailSendCodeDto, SmsSendCodeDto } from './send-code/send-code.dto';
 import { EntityManager } from 'typeorm';
 import { MayBeArray } from 'aragami/dist/src/utility/utility';
 
@@ -21,7 +21,8 @@ export interface SimpleUserOptions {
   aragamiExtras?: AragamiOptions;
   loginExpiryTimeMs?: number; // default: 30 days
   afterPutUser?: (user: SimpleUser) => Awaitable<SimpleUser | undefined>;
-  sendCodeGenerator: (ctx: SendCodeDto) => Awaitable<string>;
+  sendCodeGenerator?: (ctx: EmailSendCodeDto) => Awaitable<string>;
+  sendSmsCodeGenerator?: (ctx: SmsSendCodeDto) => Awaitable<string>;
   sendCodeValidTimeMs?: number; // default: 10 minutes
   sendCodeCooldownTimeMs?: number; // default: 1 minute
   verifyCodeMaxAttempts?: number; // default: 5

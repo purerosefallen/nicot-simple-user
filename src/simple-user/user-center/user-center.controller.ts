@@ -12,6 +12,7 @@ import { ApiBlankResponse, ApiError, DataBody } from 'nicot';
 import { ChangePasswordDto } from '../simple-user/change-password.dto';
 import { ApiInvalidCode } from '../send-code/decorators';
 import { ChangeEmailDto } from '../simple-user/change-email.dto';
+import { ChangeMobileDto } from '../simple-user/change-mobile.dto';
 
 @Controller('user-center')
 @ApiTags('user-center')
@@ -59,6 +60,17 @@ export class UserCenterController {
   @ApiBlankResponse()
   async changeEmail(@DataBody() dto: ChangeEmailDto) {
     return this.userService.changeEmail(this.currentUser, dto);
+  }
+
+  @Post('change-mobile')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Change current user mobile phone number',
+  })
+  @ApiInvalidCode()
+  @ApiBlankResponse()
+  async changeMobile(@DataBody() dto: ChangeMobileDto) {
+    return this.userService.changeMobile(this.currentUser, dto);
   }
 
   @Post('unregister')

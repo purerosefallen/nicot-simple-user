@@ -14,7 +14,11 @@ import argon2 from 'argon2';
 import { ApiProperty } from '@nestjs/swagger';
 
 // must omit in user write views
-export const SimpleUserSensitiveFields = ['email', 'password'] as const;
+export const SimpleUserSensitiveFields = [
+  'email',
+  'mobile',
+  'password',
+] as const;
 
 @Entity()
 export class SimpleUser extends IdBase() {
@@ -25,6 +29,14 @@ export class SimpleUser extends IdBase() {
       'Email address of the user. Only available for registered users',
   })
   email: string;
+
+  @QueryEqual()
+  @Index()
+  @StringColumn(30, {
+    description:
+      'Mobile phone number of the user. Only available for registered users',
+  })
+  mobile: string;
 
   @Index()
   @InternalColumn()
@@ -47,7 +59,8 @@ export class SimpleUser extends IdBase() {
   passwordSet: boolean;
 
   @NotColumn({
-    description: 'Indicates whether the user is registered (has email)',
+    description:
+      'Indicates whether the user is registered (has email or mobile)',
     required: true,
   })
   registered: boolean;
@@ -75,7 +88,7 @@ export class SimpleUser extends IdBase() {
   }
 
   isRegistered() {
-    return !!this.email;
+    return !!this.email || !!this.mobile;
   }
 
   async afterGet() {
