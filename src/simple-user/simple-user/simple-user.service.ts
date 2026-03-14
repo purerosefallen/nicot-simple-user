@@ -415,7 +415,7 @@ export class SimpleUserService<
   }
 
   async changeEmail(user: U, dto: ChangeEmailDto) {
-    if (!user.email) {
+    if (!user.isRegistered()) {
       throw new BlankReturnMessageDto(
         402,
         'Not allowed to change email for anonymous user.',
@@ -453,7 +453,7 @@ export class SimpleUserService<
     dto: ChangePasswordDto,
     ctx: UserRiskControlContext,
   ) {
-    if (!user.email) {
+    if (!user.isRegistered()) {
       throw new BlankReturnMessageDto(
         402,
         'Not allowed to change password for anonymous user.',

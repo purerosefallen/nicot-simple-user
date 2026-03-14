@@ -74,8 +74,12 @@ export class SimpleUser extends IdBase() {
     await this.setPasswordWhenAvailable();
   }
 
+  isRegistered() {
+    return !!this.email;
+  }
+
   async afterGet() {
-    this.registered = !!this.email;
+    this.registered = this.isRegistered();
     this.passwordSet = !!this.passwordHash;
   }
 
