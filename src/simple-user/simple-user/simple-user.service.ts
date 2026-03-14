@@ -176,7 +176,7 @@ export class SimpleUserService<
       where: { id } as FindOptionsWhere<U>,
     });
     if (!user || this.isUserExpired(user)) {
-      throw new BlankReturnMessageDto(404, 'User not found.').toException();
+      throw new BlankReturnMessageDto(404, '#{user_not_found}').toException();
     }
     return user;
   }
@@ -230,7 +230,7 @@ export class SimpleUserService<
         waitTimeDto.waitTimeMs = waitTimeMs;
         throw new GenericReturnMessageDto(
           429,
-          'Too many failed password attempts. Please wait before retrying.',
+          '#{too_many_password_attempts}',
           waitTimeDto,
         ).toException();
       }
@@ -325,7 +325,7 @@ export class SimpleUserService<
           await this.recordPasswordFailAttempt(ctx, user);
           throw new BlankReturnMessageDto(
             403,
-            'Invalid password.',
+            '#{invalid_password}',
           ).toException();
         }
       } else {
@@ -353,7 +353,7 @@ export class SimpleUserService<
       if (!dto.code) {
         throw new BlankReturnMessageDto(
           404,
-          'User does not exist. Please provide code to create new user.',
+          '#{user_not_exist_provide_code}',
         ).toException();
       }
       await verifyCode();
@@ -525,7 +525,7 @@ export class SimpleUserService<
         await this.recordPasswordFailAttempt(ctx, user);
         throw new BlankReturnMessageDto(
           403,
-          'Current password is incorrect.',
+          '#{current_password_incorrect}',
         ).toException();
       }
     }

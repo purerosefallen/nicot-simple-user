@@ -74,7 +74,7 @@ export class SendCodeService {
         waitTimeDto.waitTimeMs = waitTimeMs;
         throw new GenericReturnMessageDto(
           429,
-          'Please wait before requesting another code',
+          '#{send_code_cooldown}',
           waitTimeDto,
         ).toException();
       }
@@ -160,7 +160,7 @@ export class SendCodeService {
         waitTimeDto.waitTimeMs = waitTimeMs;
         throw new GenericReturnMessageDto(
           429,
-          'Too many invalid code attempts, please try again later',
+          '#{too_many_code_attempts}',
           waitTimeDto,
         ).toException();
       }
@@ -179,7 +179,7 @@ export class SendCodeService {
       }
       throw new BlankReturnMessageDto(
         403,
-        'Invalid verification code',
+        '#{invalid_code}',
       ).toException();
     }
     // this is success route

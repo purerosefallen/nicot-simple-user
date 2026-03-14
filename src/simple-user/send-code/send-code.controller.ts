@@ -13,9 +13,11 @@ import {
   ApiTooManyRequests,
 } from './decorators';
 import { SendCodeDto, VerifyCodeDto } from './send-code.dto';
+import { UseI18n } from '../i18n/i18n-init';
 
 @Controller('send-code')
 @ApiTags('send-code')
+@UseI18n()
 export class SendCodeController {
   constructor(private service: SendCodeService) {}
 

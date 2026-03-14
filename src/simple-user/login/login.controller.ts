@@ -18,9 +18,11 @@ import {
 } from '../resolver';
 import { ApiInvalidCode } from '../send-code/decorators';
 import { ResetPasswordDto } from '../simple-user/reset-password.dto';
+import { UseI18n } from '../i18n/i18n-init';
 
 @Controller('login')
 @ApiTags('login')
+@UseI18n()
 export class LoginController {
   constructor(private userService: SimpleUserService) {}
 

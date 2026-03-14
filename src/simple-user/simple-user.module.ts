@@ -23,6 +23,9 @@ import { ValueProvider } from '@nestjs/common/interfaces/modules/provider.interf
 import { patchUserCenterControllerMe } from './user-center/patch-me';
 import { addInjectionTokenMapping, ApiFromProvider } from 'nicot';
 import { SimpleUserInitialCreationService } from './simple-user-initial-creation/simple-user-initial-creation.service';
+import { SimpleUserI18nModule } from './i18n/i18n-init';
+import { SimpleUserI18nSetupService } from './i18n/i18n-setup.service';
+import { SimpleUserExtraOptions } from './options';
 
 export type SimpleUserRegisterOptions = Parameters<
   typeof ConfigurableModuleClass.register
@@ -45,6 +48,17 @@ const patchUserCenterControllerMeWithDynamicModule = (
 
 const controllers = [SendCodeController, LoginController, UserCenterController];
 
+function attachI18n(
+  base: DynamicModule,
+  options: SimpleUserExtraOptions,
+): DynamicModule {
+  if (options.useExistingI18n) return base;
+  return {
+    ...base,
+    imports: [...(base.imports || []), SimpleUserI18nModule],
+  };
+}
+
 @Module({
   providers: [
     SimpleUserService,
@@ -52,6 +66,7 @@ const controllers = [SendCodeController, LoginController, UserCenterController];
     userResolverProvider.provider,
     userRiskControlResolverProvider.provider,
     SimpleUserInitialCreationService,
+    SimpleUserI18nSetupService,
   ],
   exports: [
     SimpleUserService,
@@ -64,7 +79,7 @@ export class SimpleUserModule extends ConfigurableModuleClass {
   static register(options: SimpleUserRegisterOptions): DynamicModule {
     const base = super.register(options);
     patchUserCenterControllerMeWithDynamicModule(base);
-    return attachAragamiWithBridge(base, options);
+    return attachI18n(attachAragamiWithBridge(base, options), options);
   }
 
   static registerAsync(options: SimpleUserRegisterAsyncOptions): DynamicModule {
@@ -81,6 +96,6 @@ export class SimpleUserModule extends ConfigurableModuleClass {
         }
       }
     }
-    return attachAragamiWithBridge(base, options);
+    return attachI18n(attachAragamiWithBridge(base, options), options);
   }
 }

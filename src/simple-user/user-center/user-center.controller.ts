@@ -13,9 +13,11 @@ import { ChangePasswordDto } from '../simple-user/change-password.dto';
 import { ApiInvalidCode } from '../send-code/decorators';
 import { ChangeEmailDto } from '../simple-user/change-email.dto';
 import { ChangeMobileDto } from '../simple-user/change-mobile.dto';
+import { UseI18n } from '../i18n/i18n-init';
 
 @Controller('user-center')
 @ApiTags('user-center')
+@UseI18n()
 export class UserCenterController {
   constructor(
     private userService: SimpleUserService,

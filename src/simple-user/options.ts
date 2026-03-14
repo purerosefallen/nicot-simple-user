@@ -13,6 +13,7 @@ export interface SimpleUserExtraOptions {
   isGlobal?: boolean;
   reexportAragami?: boolean;
   useExistingAragami?: boolean;
+  useExistingI18n?: boolean;
 }
 
 export interface SimpleUserOptions {
