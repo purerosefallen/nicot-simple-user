@@ -7,7 +7,11 @@ import {
   UserRiskControlContext,
 } from '../resolver';
 import { ApiBlankResponse, DataBody, DataQuery } from 'nicot';
-import { ApiInvalidCode, ApiTooManyRequests } from './decorators';
+import {
+  ApiInvalidCode,
+  ApiSendCodeNotConfigured,
+  ApiTooManyRequests,
+} from './decorators';
 import { SendCodeDto, VerifyCodeDto } from './send-code.dto';
 
 @Controller('send-code')
@@ -23,6 +27,7 @@ export class SendCodeController {
   @ApiRiskControlContext()
   @ApiBlankResponse()
   @ApiTooManyRequests()
+  @ApiSendCodeNotConfigured()
   async sendCode(
     @DataBody() dto: SendCodeDto,
     @PutRiskControlContext() riskControlContext: UserRiskControlContext,
