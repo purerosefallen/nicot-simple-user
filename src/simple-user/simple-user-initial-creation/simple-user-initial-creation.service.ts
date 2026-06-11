@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { MODULE_OPTIONS_TOKEN } from '../module-builder';
 import { SimpleUserExtraOptions, SimpleUserOptions } from '../options';
 import { SimpleUser } from '../simple-user.entity';
-import { makeArray } from 'aragami/dist/src/utility/utility';
+import { makeArray } from '../may-be-array';
 
 @Injectable()
 export class SimpleUserInitialCreationService extends CrudBase<SimpleUser> {
