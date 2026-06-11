@@ -30,11 +30,7 @@ import { ChangeEmailDto } from './change-email.dto';
 import { ChangeMobileDto } from './change-mobile.dto';
 import { ChangePasswordDto } from './change-password.dto';
 import { ResetPasswordDto } from './reset-password.dto';
-import {
-  ContactAndCodeDto,
-  ContactDto,
-  getContactKey,
-} from './contact.dto';
+import { ContactAndCodeDto, ContactDto, getContactKey } from './contact.dto';
 
 class LoginSession {
   @CacheKey()
@@ -500,8 +496,7 @@ export class SimpleUserService<
 
   async kickUser(user: U) {
     const promises: Promise<void>[] = [];
-    if (user.email)
-      promises.push(this.kickByContactKey(`email:${user.email}`));
+    if (user.email) promises.push(this.kickByContactKey(`email:${user.email}`));
     if (user.mobile)
       promises.push(this.kickByContactKey(`mobile:${user.mobile}`));
     await Promise.all(promises);

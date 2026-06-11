@@ -11,9 +11,7 @@ import {
 import { ApiProperty, ApiHideProperty } from '@nestjs/swagger';
 
 @ValidatorConstraint({ async: false })
-class ExactlyOneOfEmailOrMobileConstraint
-  implements ValidatorConstraintInterface
-{
+class ExactlyOneOfEmailOrMobileConstraint implements ValidatorConstraintInterface {
   validate(_: any, args: ValidationArguments) {
     const obj = args.object as any;
     const hasEmail = obj.email != null && obj.email !== '';

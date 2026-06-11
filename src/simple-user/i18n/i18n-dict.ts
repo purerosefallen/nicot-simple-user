@@ -66,8 +66,7 @@ export const SIMPLE_USER_I18N_DICT: Record<string, Record<string, string>> = {
     user_not_exist_provide_code:
       "L'utilisateur n'existe pas. Veuillez fournir un code pour créer un nouvel utilisateur.",
     current_password_incorrect: 'Le mot de passe actuel est incorrect.',
-    send_code_cooldown:
-      'Veuillez patienter avant de demander un nouveau code',
+    send_code_cooldown: 'Veuillez patienter avant de demander un nouveau code',
     too_many_code_attempts:
       'Trop de tentatives de code invalides, veuillez réessayer plus tard',
     invalid_code: 'Code de vérification invalide',
@@ -107,8 +106,7 @@ export const SIMPLE_USER_I18N_DICT: Record<string, Record<string, string>> = {
     user_not_exist_provide_code:
       'O usuário não existe. Por favor, forneça um código para criar um novo usuário.',
     current_password_incorrect: 'A senha atual está incorreta.',
-    send_code_cooldown:
-      'Por favor, aguarde antes de solicitar outro código',
+    send_code_cooldown: 'Por favor, aguarde antes de solicitar outro código',
     too_many_code_attempts:
       'Muitas tentativas de código inválidas, por favor tente novamente mais tarde',
     invalid_code: 'Código de verificação inválido',
@@ -121,8 +119,7 @@ export const SIMPLE_USER_I18N_DICT: Record<string, Record<string, string>> = {
     user_not_exist_provide_code:
       'Пользователь не существует. Пожалуйста, введите код для создания нового пользователя.',
     current_password_incorrect: 'Текущий пароль неверен.',
-    send_code_cooldown:
-      'Пожалуйста, подождите перед запросом нового кода',
+    send_code_cooldown: 'Пожалуйста, подождите перед запросом нового кода',
     too_many_code_attempts:
       'Слишком много неудачных попыток ввода кода, пожалуйста, попробуйте позже',
     invalid_code: 'Недействительный код подтверждения',

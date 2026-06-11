@@ -177,10 +177,7 @@ export class SendCodeService {
           ttl: this.verifyCodeBlockTimeMs,
         });
       }
-      throw new BlankReturnMessageDto(
-        403,
-        '#{invalid_code}',
-      ).toException();
+      throw new BlankReturnMessageDto(403, '#{invalid_code}').toException();
     }
     // this is success route
     if (!noConsume) {

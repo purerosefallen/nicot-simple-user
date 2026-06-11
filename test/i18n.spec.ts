@@ -202,9 +202,7 @@ describe('i18n (e2e)', () => {
 
     it('zh-Hant', async () => {
       const res = await makeRequest('zh-Hant').expect(403);
-      expect(res.body.message).toBe(
-        dict['zh-Hant'].current_password_incorrect,
-      );
+      expect(res.body.message).toBe(dict['zh-Hant'].current_password_incorrect);
     });
 
     it('tr', async () => {

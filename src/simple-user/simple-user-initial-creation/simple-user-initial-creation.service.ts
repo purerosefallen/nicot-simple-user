@@ -25,7 +25,7 @@ export class SimpleUserInitialCreationService extends CrudBase<SimpleUser> {
   async createInitialUser(initialUser?: Partial<SimpleUser>, repo = this.repo) {
     const existing = await repo.findOne({
       where: { email: initialUser.email },
-      select: ['id'],
+      select: { id: true },
       lock: {
         mode: 'pessimistic_write',
         tables: [repo.metadata.tableName],

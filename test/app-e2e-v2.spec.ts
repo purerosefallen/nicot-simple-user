@@ -265,8 +265,7 @@ describe('SimpleUserModule v2 - mobile support (e2e)', () => {
         .expect(200);
 
       expectOkEnvelope(res.body);
-      const data = (res.body as GenericReturnMessageDto<LoginResponseDto>)
-        .data;
+      const data = (res.body as GenericReturnMessageDto<LoginResponseDto>).data;
       expect(data.token).toHaveLength(64);
       mobileToken = data.token;
     });
@@ -314,9 +313,8 @@ describe('SimpleUserModule v2 - mobile support (e2e)', () => {
         .expect(200);
 
       expectOkEnvelope(res.body);
-      mobileToken = (
-        res.body as GenericReturnMessageDto<LoginResponseDto>
-      ).data.token;
+      mobileToken = (res.body as GenericReturnMessageDto<LoginResponseDto>).data
+        .token;
     });
   });
 
@@ -523,9 +521,8 @@ describe('SimpleUserModule v2 - mobile support (e2e)', () => {
         .expect(200);
 
       expectOkEnvelope(res.body);
-      token = (
-        res.body as GenericReturnMessageDto<LoginResponseDto>
-      ).data.token;
+      token = (res.body as GenericReturnMessageDto<LoginResponseDto>).data
+        .token;
     });
   });
 
@@ -575,9 +572,8 @@ describe('SimpleUserModule v2 - mobile support (e2e)', () => {
         .expect(200);
 
       expectOkEnvelope(res.body);
-      token = (
-        res.body as GenericReturnMessageDto<LoginResponseDto>
-      ).data.token;
+      token = (res.body as GenericReturnMessageDto<LoginResponseDto>).data
+        .token;
     });
   });
 
