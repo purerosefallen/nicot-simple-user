@@ -9,7 +9,7 @@ import {
   StringColumn,
 } from 'nicot';
 import { Entity, ManyToOne } from 'typeorm';
-import { AppUser } from '../app-user.entity';
+import { AppUser } from '../app-user.entity.js';
 
 @Entity()
 export class Article extends IdBase() {

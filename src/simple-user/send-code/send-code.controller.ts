@@ -1,19 +1,19 @@
 import { Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SendCodeService } from './send-code.service';
+import { SendCodeService } from './send-code.service.js';
 import {
   ApiRiskControlContext,
   PutRiskControlContext,
   UserRiskControlContext,
-} from '../resolver';
+} from '../resolver.js';
 import { ApiBlankResponse, DataBody, DataQuery } from 'nicot';
 import {
   ApiInvalidCode,
   ApiSendCodeNotConfigured,
   ApiTooManyRequests,
-} from './decorators';
-import { SendCodeDto, VerifyCodeDto } from './send-code.dto';
-import { UseI18n } from '../i18n/i18n-init';
+} from './decorators.js';
+import { SendCodeDto, VerifyCodeDto } from './send-code.dto.js';
+import { UseI18n } from '../i18n/i18n-init.js';
 
 @Controller('send-code')
 @ApiTags('send-code')

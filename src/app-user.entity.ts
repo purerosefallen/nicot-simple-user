@@ -1,7 +1,7 @@
-import { SimpleUser } from './simple-user';
+import { SimpleUser } from './simple-user/index.js';
 import { Entity, OneToMany } from 'typeorm';
 import { IntColumn, NotColumn } from 'nicot';
-import { Article } from './article/article.entity';
+import { Article } from './article/article.entity.js';
 
 @Entity()
 export class AppUser extends SimpleUser {

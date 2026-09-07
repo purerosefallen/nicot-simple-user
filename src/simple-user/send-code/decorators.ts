@@ -1,5 +1,5 @@
 import { ApiError, ApiErrorTyped, MergeClassOrMethodDecorators } from 'nicot';
-import { WaitTimeDto } from './wait-time.dto';
+import { WaitTimeDto } from './wait-time.dto.js';
 
 export const ApiTooManyRequests = () =>
   ApiErrorTyped(429, 'Too many requests', WaitTimeDto);

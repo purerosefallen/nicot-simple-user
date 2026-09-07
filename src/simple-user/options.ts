@@ -1,10 +1,10 @@
 import { AragamiOptions, Awaitable } from 'aragami';
 import { ClassType } from 'nicot';
-import { SimpleUser } from './simple-user.entity';
+import { SimpleUser } from './simple-user.entity.js';
 import { CrudOptions } from 'nicot';
-import { EmailSendCodeDto, SmsSendCodeDto } from './send-code/send-code.dto';
+import { EmailSendCodeDto, SmsSendCodeDto } from './send-code/send-code.dto.js';
 import { EntityManager } from 'typeorm';
-import { MayBeArray } from './may-be-array';
+import { MayBeArray } from './may-be-array.js';
 
 export interface SimpleUserExtraOptions {
   userClass?: ClassType<SimpleUser>;

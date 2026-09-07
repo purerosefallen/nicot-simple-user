@@ -1,5 +1,5 @@
 import { createI18n } from 'nesties';
-import { SIMPLE_USER_LOCALES } from './i18n-dict';
+import { SIMPLE_USER_LOCALES } from './i18n-dict.js';
 
 const i18n = createI18n({
   locales: SIMPLE_USER_LOCALES,

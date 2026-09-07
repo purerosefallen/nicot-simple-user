@@ -1,11 +1,11 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { CrudBase } from 'nicot';
-import { OptionsExToken, UserRepoToken } from '../tokens';
+import { OptionsExToken, UserRepoToken } from '../tokens.js';
 import { Repository } from 'typeorm';
-import { MODULE_OPTIONS_TOKEN } from '../module-builder';
-import { SimpleUserExtraOptions, SimpleUserOptions } from '../options';
-import { SimpleUser } from '../simple-user.entity';
-import { makeArray } from '../may-be-array';
+import { MODULE_OPTIONS_TOKEN } from '../module-builder.js';
+import { SimpleUserExtraOptions, SimpleUserOptions } from '../options.js';
+import { SimpleUser } from '../simple-user.entity.js';
+import { makeArray } from '../may-be-array.js';
 
 @Injectable()
 export class SimpleUserInitialCreationService extends CrudBase<SimpleUser> {

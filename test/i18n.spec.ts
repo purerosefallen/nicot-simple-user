@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { AppModule } from './../src/app.module.js';
 import { GenericReturnMessageDto } from 'nicot';
-import { LoginResponseDto } from '../src/simple-user/simple-user/login.dto';
-import { SIMPLE_USER_I18N_DICT } from '../src/simple-user/i18n/i18n-dict';
+import { LoginResponseDto } from 'nicot-simple-user/src/simple-user/simple-user/login.dto';
+import { SIMPLE_USER_I18N_DICT } from '../src/simple-user/i18n/i18n-dict.js';
 
 const dict = SIMPLE_USER_I18N_DICT;
 

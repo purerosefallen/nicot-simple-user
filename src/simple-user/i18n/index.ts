@@ -1,3 +1,3 @@
-export * from './i18n-dict';
-export * from './i18n-init';
-export * from './i18n-setup.service';
+export * from './i18n-dict.js';
+export * from './i18n-init.js';
+export * from './i18n-setup.service.js';

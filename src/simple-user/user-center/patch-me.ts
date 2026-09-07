@@ -1,7 +1,7 @@
 import { RestfulFactory } from 'nicot';
-import { UserCenterController } from './user-center.controller';
+import { UserCenterController } from './user-center.controller.js';
 import { ApiOkResponse } from '@nestjs/swagger';
-import { SimpleUserExtraOptions } from '../options';
+import { SimpleUserExtraOptions } from '../options.js';
 
 export const patchUserCenterControllerMe = (extras: SimpleUserExtraOptions) => {
   const factory = new RestfulFactory(extras.userClass, {

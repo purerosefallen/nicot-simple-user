@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
-import { ArticleFactory } from './article.factory';
-import { ArticleService } from './article.service';
+import { ArticleFactory } from './article.factory.js';
+import { ArticleService } from './article.service.js';
 import { ApiInject } from 'nicot';
 
 @Controller('article')

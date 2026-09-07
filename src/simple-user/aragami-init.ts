@@ -1,8 +1,8 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { SimpleUserExtraOptions, SimpleUserOptions } from './options';
+import { SimpleUserExtraOptions, SimpleUserOptions } from './options.js';
 import { AragamiOptions } from 'aragami';
 import { createProvider } from 'nicot';
-import { MODULE_OPTIONS_TOKEN } from './module-builder';
+import { MODULE_OPTIONS_TOKEN } from './module-builder.js';
 import { AragamiModule } from 'nestjs-aragami';
 
 @Module({})

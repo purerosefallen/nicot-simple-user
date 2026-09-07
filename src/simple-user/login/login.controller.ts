@@ -1,6 +1,6 @@
 import { Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SimpleUserService } from '../simple-user/simple-user.service';
+import { SimpleUserService } from '../simple-user/simple-user.service.js';
 import {
   ApiBlankResponse,
   ApiError,
@@ -8,17 +8,17 @@ import {
   DataBody,
   DataQuery,
 } from 'nicot';
-import { UserExistsDto } from '../simple-user/user-exists.dto';
-import { ContactDto, ContactAndCodeDto } from '../simple-user/contact.dto';
-import { LoginDto, LoginResponseDto } from '../simple-user/login.dto';
+import { UserExistsDto } from '../simple-user/user-exists.dto.js';
+import { ContactDto, ContactAndCodeDto } from '../simple-user/contact.dto.js';
+import { LoginDto, LoginResponseDto } from '../simple-user/login.dto.js';
 import {
   ApiRiskControlContext,
   PutRiskControlContext,
   UserRiskControlContext,
-} from '../resolver';
-import { ApiInvalidCode } from '../send-code/decorators';
-import { ResetPasswordDto } from '../simple-user/reset-password.dto';
-import { UseI18n } from '../i18n/i18n-init';
+} from '../resolver.js';
+import { ApiInvalidCode } from '../send-code/decorators.js';
+import { ResetPasswordDto } from '../simple-user/reset-password.dto.js';
+import { UseI18n } from '../i18n/i18n-init.js';
 
 @Controller('login')
 @ApiTags('login')

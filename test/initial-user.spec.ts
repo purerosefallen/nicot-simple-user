@@ -3,7 +3,7 @@ import {
   SimpleUser,
   SimpleUserModule,
   SimpleUserService,
-} from '../src/simple-user';
+} from 'nicot-simple-user';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BlankReturnMessageDto } from 'nicot';
 
@@ -18,7 +18,7 @@ describe('InitialUser', () => {
           dropSchema: true,
           synchronize: true,
           host: '127.0.0.1',
-          port: 5432,
+          port: Number(process.env.DB_PORT || 55432),
           username: 'postgres',
           password: 'postgres',
           database: 'postgres',

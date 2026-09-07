@@ -1,19 +1,19 @@
 import { Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SimpleUserService } from '../simple-user/simple-user.service';
-import { SimpleUser } from '../simple-user.entity';
+import { SimpleUserService } from '../simple-user/simple-user.service.js';
+import { SimpleUser } from '../simple-user.entity.js';
 import {
   ApiRiskControlContext,
   InjectCurrentUser,
   PutRiskControlContext,
   UserRiskControlContext,
-} from '../resolver';
+} from '../resolver.js';
 import { ApiBlankResponse, ApiError, DataBody } from 'nicot';
-import { ChangePasswordDto } from '../simple-user/change-password.dto';
-import { ApiInvalidCode } from '../send-code/decorators';
-import { ChangeEmailDto } from '../simple-user/change-email.dto';
-import { ChangeMobileDto } from '../simple-user/change-mobile.dto';
-import { UseI18n } from '../i18n/i18n-init';
+import { ChangePasswordDto } from '../simple-user/change-password.dto.js';
+import { ApiInvalidCode } from '../send-code/decorators.js';
+import { ChangeEmailDto } from '../simple-user/change-email.dto.js';
+import { ChangeMobileDto } from '../simple-user/change-mobile.dto.js';
+import { UseI18n } from '../i18n/i18n-init.js';
 
 @Controller('user-center')
 @ApiTags('user-center')

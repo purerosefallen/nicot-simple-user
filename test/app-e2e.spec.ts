@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from './../src/app.module';
-import { AppUser } from '../src/app-user.entity';
+import { AppModule } from './../src/app.module.js';
+import { AppUser } from '../src/app-user.entity.js';
 import { GenericReturnMessageDto } from 'nicot';
-import { LoginResponseDto } from '../src/simple-user/simple-user/login.dto';
+import { LoginResponseDto } from 'nicot-simple-user/src/simple-user/simple-user/login.dto';
 
 describe('SimpleUserModule (e2e)', () => {
   let app: INestApplication;

@@ -1,7 +1,7 @@
 import { ConfigurableModuleBuilder } from '@nestjs/common';
-import { SimpleUserExtraOptions, SimpleUserOptions } from './options';
-import { SimpleUser } from './simple-user.entity';
-import { OptionsExToken, UserRepoToken } from './tokens';
+import { SimpleUserExtraOptions, SimpleUserOptions } from './options.js';
+import { SimpleUser } from './simple-user.entity.js';
+import { OptionsExToken, UserRepoToken } from './tokens.js';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 
 export const { ConfigurableModuleClass, MODULE_OPTIONS_TOKEN } =

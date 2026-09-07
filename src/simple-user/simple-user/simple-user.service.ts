@@ -6,7 +6,7 @@ import {
   CrudOptions,
   GenericReturnMessageDto,
 } from 'nicot';
-import { SimpleUser } from '../simple-user.entity';
+import { SimpleUser } from '../simple-user.entity.js';
 import {
   FindOneOptions,
   FindOptionsWhere,
@@ -15,22 +15,22 @@ import {
   QueryDeepPartialEntity,
   Repository,
 } from 'typeorm';
-import { SimpleUserExtraOptions, SimpleUserOptions } from '../options';
-import { MODULE_OPTIONS_TOKEN } from '../module-builder';
-import { OptionsExToken, UserRepoToken } from '../tokens';
-import { UserContext, UserRiskControlContext } from '../resolver';
+import { SimpleUserExtraOptions, SimpleUserOptions } from '../options.js';
+import { MODULE_OPTIONS_TOKEN } from '../module-builder.js';
+import { OptionsExToken, UserRepoToken } from '../tokens.js';
+import { UserContext, UserRiskControlContext } from '../resolver.js';
 import { InjectAragami } from 'nestjs-aragami';
 import { Aragami, CacheKey } from 'aragami';
-import { LoginDto, LoginResponseDto } from './login.dto';
-import { SendCodeService } from '../send-code/send-code.service';
-import { CodePurpose } from '../send-code/send-code.dto';
+import { LoginDto, LoginResponseDto } from './login.dto.js';
+import { SendCodeService } from '../send-code/send-code.service.js';
+import { CodePurpose } from '../send-code/send-code.dto.js';
 import cryptoRandomString from 'crypto-random-string';
-import { WaitTimeDto } from '../send-code/wait-time.dto';
-import { ChangeEmailDto } from './change-email.dto';
-import { ChangeMobileDto } from './change-mobile.dto';
-import { ChangePasswordDto } from './change-password.dto';
-import { ResetPasswordDto } from './reset-password.dto';
-import { ContactAndCodeDto, ContactDto, getContactKey } from './contact.dto';
+import { WaitTimeDto } from '../send-code/wait-time.dto.js';
+import { ChangeEmailDto } from './change-email.dto.js';
+import { ChangeMobileDto } from './change-mobile.dto.js';
+import { ChangePasswordDto } from './change-password.dto.js';
+import { ResetPasswordDto } from './reset-password.dto.js';
+import { ContactAndCodeDto, ContactDto, getContactKey } from './contact.dto.js';
 
 class LoginSession {
   @CacheKey()
@@ -72,7 +72,7 @@ export class SimpleUserService<
     super(
       optionsEx.userClass as ClassType<U>,
       repo,
-      (optionsEx.userServiceCrudExtras as CrudOptions<U>) || {},
+      optionsEx.userServiceCrudExtras || {},
     );
   }
 
@@ -583,7 +583,7 @@ export class SimpleUserService<
         where: {
           ...this.getContactWhere(dto),
           unregisterTime: IsNull(),
-        } as FindOptionsWhere<U>,
+        },
       });
       if (!user) {
         // this is already unregistered or not exist, so we silently return success

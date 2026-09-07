@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ContactAndCodeDto } from './contact.dto';
+import { ContactAndCodeDto } from './contact.dto.js';
 
 export class ResetPasswordDto extends ContactAndCodeDto {
   @IsString()

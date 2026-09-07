@@ -7,25 +7,25 @@ import {
 import {
   ConfigurableModuleClass,
   MODULE_OPTIONS_TOKEN,
-} from './module-builder';
-import { attachAragamiWithBridge } from './aragami-init';
-import { SimpleUserService } from './simple-user/simple-user.service';
-import { SendCodeService } from './send-code/send-code.service';
-import { SendCodeController } from './send-code/send-code.controller';
-import { LoginController } from './login/login.controller';
-import { UserCenterController } from './user-center/user-center.controller';
+} from './module-builder.js';
+import { attachAragamiWithBridge } from './aragami-init.js';
+import { SimpleUserService } from './simple-user/simple-user.service.js';
+import { SendCodeService } from './send-code/send-code.service.js';
+import { SendCodeController } from './send-code/send-code.controller.js';
+import { LoginController } from './login/login.controller.js';
+import { UserCenterController } from './user-center/user-center.controller.js';
 import {
   userResolverProvider,
   userRiskControlResolverProvider,
-} from './resolver';
-import { OptionsExToken } from './tokens';
+} from './resolver.js';
+import { OptionsExToken } from './tokens.js';
 import { ValueProvider } from '@nestjs/common/interfaces/modules/provider.interface';
-import { patchUserCenterControllerMe } from './user-center/patch-me';
+import { patchUserCenterControllerMe } from './user-center/patch-me.js';
 import { addInjectionTokenMapping, ApiFromProvider } from 'nicot';
-import { SimpleUserInitialCreationService } from './simple-user-initial-creation/simple-user-initial-creation.service';
-import { SimpleUserI18nModule } from './i18n/i18n-init';
-import { SimpleUserI18nSetupService } from './i18n/i18n-setup.service';
-import { SimpleUserExtraOptions } from './options';
+import { SimpleUserInitialCreationService } from './simple-user-initial-creation/simple-user-initial-creation.service.js';
+import { SimpleUserI18nModule } from './i18n/i18n-init.js';
+import { SimpleUserI18nSetupService } from './i18n/i18n-setup.service.js';
+import { SimpleUserExtraOptions } from './options.js';
 
 export type SimpleUserRegisterOptions = Parameters<
   typeof ConfigurableModuleClass.register

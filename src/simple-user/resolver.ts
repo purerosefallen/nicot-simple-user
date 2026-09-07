@@ -5,7 +5,7 @@ import {
   TransformParamResolver,
   TypeFromParamResolver,
 } from 'nicot';
-import { SimpleUserService } from './simple-user/simple-user.service';
+import { SimpleUserService } from './simple-user/simple-user.service.js';
 import { ContextIdFactory } from '@nestjs/core';
 
 export const userTokenResolver = new ParamResolver({

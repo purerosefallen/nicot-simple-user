@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ContactDto } from './contact.dto';
+import { ContactDto } from './contact.dto.js';
 
 export class LoginDto extends ContactDto {
   @IsOptional()

@@ -7,8 +7,8 @@
 .dockerignore
 Dockerfile*
 /src
-/dist/app*
-/dist/*.js
-/dist/*.d.ts
-/dist/article
-/dist/user-language
+/dist/src/app*
+/dist/src/article
+/dist/src/main*
+/dist/src/user-language
+/dist/src/utility

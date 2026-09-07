@@ -1,3 +1,3 @@
-import { MobileAndCodeDto } from './mobile.dto';
+import { MobileAndCodeDto } from './mobile.dto.js';
 
 export class ChangeMobileDto extends MobileAndCodeDto {}

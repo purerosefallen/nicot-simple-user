@@ -1,8 +1,8 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ContactDto } from '../simple-user/contact.dto';
-import { EmailDto } from '../simple-user/email.dto';
-import { MobileDto } from '../simple-user/mobile.dto';
+import { ContactDto } from '../simple-user/contact.dto.js';
+import { EmailDto } from '../simple-user/email.dto.js';
+import { MobileDto } from '../simple-user/mobile.dto.js';
 
 export enum CodePurpose {
   Login = 'Login',

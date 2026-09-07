@@ -1,15 +1,15 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
-import { MODULE_OPTIONS_TOKEN } from '../module-builder';
-import { SimpleUserOptions } from '../options';
-import { CodePurpose, SendCodeDto } from './send-code.dto';
+import { MODULE_OPTIONS_TOKEN } from '../module-builder.js';
+import { SimpleUserOptions } from '../options.js';
+import { CodePurpose, SendCodeDto } from './send-code.dto.js';
 import { Aragami, CacheKey } from 'aragami';
 import { InjectAragami } from 'nestjs-aragami';
 import { GenericReturnMessageDto } from 'nicot';
-import { WaitTimeDto } from './wait-time.dto';
+import { WaitTimeDto } from './wait-time.dto.js';
 import { BlankReturnMessageDto } from 'nicot';
-import { CodeContext } from './code-context';
-import { UserRiskControlContext } from '../resolver';
-import { getContactKey, getContactTarget } from '../simple-user/contact.dto';
+import { CodeContext } from './code-context.js';
+import { UserRiskControlContext } from '../resolver.js';
+import { getContactKey, getContactTarget } from '../simple-user/contact.dto.js';
 
 const buildSendCodeCacheKey = (ctx: {
   email?: string;

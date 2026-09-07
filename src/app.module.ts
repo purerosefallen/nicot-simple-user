@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { loadConfig } from './utility/load-config';
+import { loadConfig } from './utility/load-config.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SimpleUserModule } from './simple-user/simple-user.module';
-import { AppUser } from './app-user.entity';
-import { ArticleService } from './article/article.service';
-import { Article } from './article/article.entity';
-import { ArticleController } from './article/article.controller';
+import { SimpleUserModule } from './simple-user/simple-user.module.js';
+import { AppUser } from './app-user.entity.js';
+import { ArticleService } from './article/article.service.js';
+import { Article } from './article/article.entity.js';
+import { ArticleController } from './article/article.controller.js';
 import {
   UserLanguageModule,
   UserLanguageProvider,
-} from './user-language/user-language.module';
+} from './user-language/user-language.module.js';
 import { AragamiModule } from 'nestjs-aragami';
 
 @Module({
