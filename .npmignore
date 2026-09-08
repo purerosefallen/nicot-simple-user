@@ -7,6 +7,10 @@
 .dockerignore
 Dockerfile*
 /src
+/test
+/tests
+/dist/test
+/dist/tests
 /dist/src/app*
 /dist/src/article
 /dist/src/main*
