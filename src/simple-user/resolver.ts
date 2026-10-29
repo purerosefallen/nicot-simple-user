@@ -22,7 +22,7 @@ export const userSsaidResolver = new ParamResolver({
   required: true,
 });
 
-export const ipResolver = new ParamResolver((req) => {
+export const ipResolver = new ParamResolver((req: { ip: string }) => {
   const ip = req.ip;
   if (ip.startsWith('::ffff:')) {
     return ip.substring(7);

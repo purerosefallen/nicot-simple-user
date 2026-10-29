@@ -1,14 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { NestNodeApplication, NodeAdapter } from '@nestjs/platform-node';
 import { AppModule } from './app.module.js';
 import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestNodeApplication>(
+    AppModule,
+    new NodeAdapter({ trustProxy: ['172.16.0.0/12', 'loopback'] }),
+  );
   app.setGlobalPrefix('api');
   app.enableCors();
-  app.set('trust proxy', ['172.16.0.0/12', 'loopback']);
   app.enableShutdownHooks();
 
   const config = app.get(ConfigService);
