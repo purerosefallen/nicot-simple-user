@@ -1,3 +1,4 @@
+import { NodeAdapter } from '@nestjs/platform-node';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   SimpleUser,
@@ -42,7 +43,7 @@ describe('InitialUser', () => {
       ],
     }).compile();
 
-    const app1 = m1.createNestApplication();
+    const app1 = m1.createNestApplication(new NodeAdapter());
     await app1.init();
 
     const s1 = app1.get(SimpleUserService);
